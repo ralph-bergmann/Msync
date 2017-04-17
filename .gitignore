@@ -1,7 +1,10 @@
+<<<<<<< HEAD
 # Built application files
 *.apk
 *.ap_
 
+=======
+>>>>>>> init
 # Files for the ART/Dalvik VM
 *.dex
 
@@ -32,9 +35,30 @@ proguard/
 # Android Studio captures folder
 captures/
 
+<<<<<<< HEAD
 # Intellij
 *.iml
 .idea/workspace.xml
 
 # Keystore files
 *.jks
+=======
+# External native build folder generated in Android Studio 2.2 and later
+.externalNativeBuild
+
+# Intellij - https://intellij-support.jetbrains.com/hc/en-us/articles/206544839-How-to-manage-projects-under-Version-Control-Systems
+*.iml
+/.idea/dictionaries/
+/.idea/libraries/
+/.idea/misc.xml
+/.idea/workspace.xml
+/.idea/tasks.xml
+!/*.iml
+!/app/*.iml
+
+/keystore
+/releases
+
+# osx
+.DS_Store
+>>>>>>> init

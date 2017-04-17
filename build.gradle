@@ -1,0 +1,83 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+
+    if (file('./keystore/signing.gradle').exists()) {
+        apply from: './keystore/signing.gradle'
+    }
+
+    ext.configuration = [
+        package          : "eu.the4thfloor.msync",
+        buildToolsVersion: "25.0.2",
+        minSdk           : 16,
+        targetSdk        : 25,
+        compileVersion   : 25,
+        version_code     : 'git rev-list master --first-parent --count'.execute([], project.rootDir).text.trim().toInteger(),
+        version_name     : "1.0.0",
+        gitSha           : "git rev-parse --short HEAD".execute([], project.rootDir).text.trim(),
+        buildTime        : new Date().format("yyyy-MM-dd' 'HH:mm:ss' 'z"),
+        hasKeyfile       : file('./keystore/signing.gradle').exists(),
+    ]
+
+    ext.libs = [
+        anko                    : "0.10.0-beta-2",
+        dagger2                 : '2.10',
+        espresso                : "2.3-alpha",
+        firebase                : '10.2.1',
+        firebase_jobdispatcher  : '0.6.0',
+        gson                    : "2.8.0",
+        jsr305                  : "3.0.1",
+        junit                   : "4.12",
+        kotlin                  : "1.1.2-eap-69",
+        kotson                  : "2.5.0",
+        leakcanary              : "1.5",
+        okhttp_logging          : "3.6.0",
+        retrofit                : "2.2.0",
+        retrofit_rxjava2_adapter: "1.0.0",
+        rxandroid               : "2.0.1",
+        rxbinding               : "2.0.0",
+        rxjava                  : "2.0.8",
+        rxreplaying             : "2.0.0",
+        stetho                  : "1.5.0",
+        support                 : "26.0.0-alpha1",
+        support_test            : "0.6-alpha",
+        threetenabp             : "1.0.5",
+        timber                  : "4.5.1",
+    ]
+
+    repositories {
+        jcenter()
+        mavenCentral()
+        maven {
+            url 'http://dl.bintray.com/kotlin/kotlin-eap-1.1'
+        }
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.4.0-alpha6'
+        classpath 'com.google.gms:google-services:3.0.0'
+        classpath 'com.github.triplet.gradle:play-publisher:1.2.0'
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.14.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${rootProject.ext.libs.kotlin}"
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+    }
+    repositories {
+        jcenter()
+        mavenCentral()
+        maven {
+            url 'http://dl.bintray.com/kotlin/kotlin-eap-1.1'
+        }
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
