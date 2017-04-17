@@ -23,3 +23,43 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-keepattributes *Annotation*,SourceFile,LineNumberTable,Exceptions,Signature
+
+# square okhttp3 / okio
+-keep class okhttp3.** { *; }
+-keep interface okhttp3.** { *; }
+-dontwarn okhttp3.**
+-dontwarn okio.**
+
+# square retrofit2
+-dontwarn retrofit2.**
+-keep class retrofit2.** { *; }
+-keepclasseswithmembers class * {
+    @retrofit2.http.* <methods>;
+}
+-keep class rx.Single      # needed for RxJavaCallAdapterFactory.get(Type returnType, Annotation[] annotations, Retrofit retrofit)
+-keep class rx.Completable
+
+
+# kotlin
+-dontwarn kotlin.**
+
+
+# anko
+-dontwarn org.jetbrains.anko.**
+
+
+# rx
+-dontwarn rx.**
+-keep class rx.internal.util.unsafe.** { *; }
+
+
+# gson
+-keep class sun.misc.Unsafe { *; }
+-keep class eu.the4thfloor.msync.api.models.** { *; }
+
+
+# remove Timber and Log calls
+-assumenosideeffects class timber.log.Timber { *; }
+-assumenosideeffects class android.util.Log { *; }

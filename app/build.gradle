@@ -3,7 +3,7 @@ apply plugin: 'com.github.triplet.play'
 apply plugin: 'com.github.ben-manes.versions'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
-//apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-kapt'
 
 def cfg = rootProject.ext.configuration
 def libs = rootProject.ext.libs
@@ -21,7 +21,9 @@ android {
         versionName cfg.version_name
 
         resConfig "en"
-        buildConfigField "String", "TMDB_API_KEY", "\"${tmdb_api_key}\""
+        buildConfigField "String", "MEETUP_OAUTH_KEY", "\"${meetup_oauth_key}\""
+        buildConfigField "String", "MEETUP_OAUTH_SECRET", "\"${meetup_oauth_secret}\""
+        buildConfigField "String", "MEETUP_OAUTH_REDIRECT_URI", "\"${meetup_oauth_redirect_uri}\""
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -144,8 +146,7 @@ dependencies {
 
     // dagger2
     compile "com.google.dagger:dagger:${libs.dagger2}"
-//    kapt "com.google.dagger:dagger-compiler:${libs.dagger2}"
-    annotationProcessor "com.google.dagger:dagger-compiler:${libs.dagger2}"
+    kapt "com.google.dagger:dagger-compiler:${libs.dagger2}"
 
     // für's Testen
 
