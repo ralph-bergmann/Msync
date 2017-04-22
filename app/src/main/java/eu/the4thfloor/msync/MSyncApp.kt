@@ -1,15 +1,14 @@
 package eu.the4thfloor.msync
 
 import android.app.Application
-
-import com.facebook.stetho.Stetho
+import android.os.StrictMode
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.squareup.leakcanary.LeakCanary
 import com.squareup.leakcanary.RefWatcher
-
 import eu.the4thfloor.msync.di.MainComponent
 import eu.the4thfloor.msync.di.MainModule
 import eu.the4thfloor.msync.utils.DebugTree
+import eu.the4thfloor.msync.utils.enableStetho
 import timber.log.Timber
 
 
@@ -29,11 +28,22 @@ class MSyncApp : Application() {
         }
         refWatcher = LeakCanary.install(this)
 
-        graph = MainComponent.Initializer.init(MainModule(this))
-
         if (BuildConfig.DEBUG) {
+
+            // Timber
+
             Timber.plant(DebugTree("msync"))
-            Stetho.initializeWithDefaults(this)
+
+
+            // StrictMode
+
+            StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.Builder().detectNetwork().detectCustomSlowCalls().penaltyLog().build())
+            StrictMode.setVmPolicy(StrictMode.VmPolicy.Builder().detectAll().penaltyLog().build())
+
+
+            // stetho
+
+            enableStetho()
         }
         AndroidThreeTen.init(this)
     }
@@ -43,7 +53,8 @@ class MSyncApp : Application() {
         var instance: MSyncApp? = null
             private set
 
-        var graph: MainComponent? = null
-            private set
+        val graph: MainComponent by lazy {
+            MainComponent.Initializer.init(MainModule(instance!!))
+        }
     }
 }

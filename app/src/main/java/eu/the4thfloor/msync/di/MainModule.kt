@@ -5,7 +5,7 @@ import dagger.Provides
 import eu.the4thfloor.msync.MSyncApp
 import javax.inject.Singleton
 
-@Module(includes = arrayOf(NetworkModule::class, FirebaseModule::class))
+@Module(includes = arrayOf(NetworkModule::class))
 class MainModule(private val app: MSyncApp) {
 
     @Provides

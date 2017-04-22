@@ -1,14 +1,14 @@
 package eu.the4thfloor.msync.di
 
-import com.facebook.stetho.okhttp3.StethoInterceptor
 import dagger.Module
 import dagger.Provides
 import eu.the4thfloor.msync.BuildConfig
 import eu.the4thfloor.msync.MSyncApp
+import eu.the4thfloor.msync.utils.enableLogging
+import eu.the4thfloor.msync.utils.enableStetho
 import okhttp3.Cache
 import okhttp3.CertificatePinner
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import java.io.File
 import javax.inject.Singleton
 
@@ -27,12 +27,8 @@ class OkHttpModule {
         builder.cache(cache)
 
         if (BuildConfig.DEBUG) {
-
-            val logging = HttpLoggingInterceptor()
-            logging.level = HttpLoggingInterceptor.Level.BASIC
-            builder.addNetworkInterceptor(logging)
-
-            builder.addNetworkInterceptor(StethoInterceptor())
+            builder.enableLogging()
+            builder.enableStetho()
         }
 
         val certificatePinner = CertificatePinner.Builder()

@@ -34,7 +34,7 @@ class LoginActivity : Activity() {
         this.requestWindowFeature(Window.FEATURE_NO_TITLE)
         super.onCreate(savedInstanceState)
 
-        MSyncApp.graph?.inject(this)
+        MSyncApp.graph.inject(this)
 
         webView = WebView(this)
         webView?.let {
