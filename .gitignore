@@ -50,6 +50,7 @@ captures/
 
 /keystore
 /releases
+/stuff
 
 # osx
 .DS_Store
