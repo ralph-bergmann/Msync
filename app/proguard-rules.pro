@@ -27,19 +27,12 @@
 -keepattributes *Annotation*,SourceFile,LineNumberTable,Exceptions,Signature
 
 # square okhttp3 / okio
--keep class okhttp3.** { *; }
--keep interface okhttp3.** { *; }
 -dontwarn okhttp3.**
 -dontwarn okio.**
 
+
 # square retrofit2
 -dontwarn retrofit2.**
--keep class retrofit2.** { *; }
--keepclasseswithmembers class * {
-    @retrofit2.http.* <methods>;
-}
--keep class rx.Single      # needed for RxJavaCallAdapterFactory.get(Type returnType, Annotation[] annotations, Retrofit retrofit)
--keep class rx.Completable
 
 
 # kotlin
@@ -55,8 +48,7 @@
 -keep class rx.internal.util.unsafe.** { *; }
 
 
-# gson
--keep class sun.misc.Unsafe { *; }
+# moshi
 -keep class eu.the4thfloor.msync.api.models.** { *; }
 
 

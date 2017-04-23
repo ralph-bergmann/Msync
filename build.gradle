@@ -24,7 +24,6 @@ buildscript {
         dagger2                 : '2.10',
         firebase_jobdispatcher  : '0.6.0',
         jsr305                  : "3.0.1",
-        junit                   : "4.12",
         kotlin                  : "1.1.2-eap-77",
         kotson                  : "2.5.0",
         leakcanary              : "1.5",

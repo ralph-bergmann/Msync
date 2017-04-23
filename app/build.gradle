@@ -125,10 +125,6 @@ dependencies {
     // dagger2
     compile "com.google.dagger:dagger:${libs.dagger2}"
     kapt "com.google.dagger:dagger-compiler:${libs.dagger2}"
-
-    // für's Testen
-
-    testCompile "junit:junit:${libs.junit}"
 }
 
 
