@@ -110,13 +110,9 @@ dependencies {
     compile "io.reactivex.rxjava2:rxjava:${libs.rxjava}"
     compile "io.reactivex.rxjava2:rxandroid:${libs.rxandroid}"
 
-    // gson
-    compile "com.google.code.gson:gson:${libs.gson}"
-    compile "com.github.salomonbrys.kotson:kotson:${libs.kotson}"
-
     // retrofit
     compile "com.squareup.retrofit2:retrofit:${libs.retrofit}"
-    compile "com.squareup.retrofit2:converter-gson:${libs.retrofit}"
+    compile "com.squareup.retrofit2:converter-moshi:${libs.retrofit}"
     compile "com.jakewharton.retrofit:retrofit2-rxjava2-adapter:${libs.retrofit_rxjava2_adapter}"
     debugCompile "com.squareup.okhttp3:logging-interceptor:${libs.okhttp_logging}"
 
