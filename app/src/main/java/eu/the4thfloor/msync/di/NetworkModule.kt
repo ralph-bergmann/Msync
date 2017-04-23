@@ -17,7 +17,7 @@ class NetworkModule {
 
     @Provides
     @Singleton
-    internal fun provideApi(gson: Gson, client: OkHttpClient): MeetupApi {
+    internal fun provideRetrofit(gson: Gson, client: OkHttpClient): Retrofit {
 
         val apiClient = client
             .newBuilder()
@@ -29,6 +29,11 @@ class NetworkModule {
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .client(apiClient)
             .build()
-            .create(MeetupApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    internal fun provideApi(retrofit: Retrofit): MeetupApi {
+        return retrofit.create(MeetupApi::class.java)
     }
 }

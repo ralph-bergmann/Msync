@@ -95,9 +95,6 @@ dependencies {
 
     // anko
     compile "org.jetbrains.anko:anko-sdk15:${libs.anko}" // sdk19, sdk21, sdk23 are also available
-    compile "org.jetbrains.anko:anko-support-v4:${libs.anko}" // In case you need support.v4 bindings
-    compile "org.jetbrains.anko:anko-appcompat-v7:${libs.anko}" // For appcompat-v7 bindings
-    compile "org.jetbrains.anko:anko-sqlite:${libs.anko}" // For appcompat-v7 bindings
 
     // timber
     compile "com.jakewharton.timber:timber:${libs.timber}"
@@ -112,7 +109,6 @@ dependencies {
     // rx
     compile "io.reactivex.rxjava2:rxjava:${libs.rxjava}"
     compile "io.reactivex.rxjava2:rxandroid:${libs.rxandroid}"
-    compile "com.jakewharton.rxbinding2:rxbinding:${libs.rxbinding}"
 
     // gson
     compile "com.google.code.gson:gson:${libs.gson}"
