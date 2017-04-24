@@ -20,10 +20,13 @@ android {
         versionCode cfg.version_code
         versionName cfg.version_name
 
+        Properties props = new Properties()
+        props.load(new FileInputStream('./keystore/meetup.properties'))
+
         resConfig "en"
-        buildConfigField "String", "MEETUP_OAUTH_KEY", "\"${meetup_oauth_key}\""
-        buildConfigField "String", "MEETUP_OAUTH_SECRET", "\"${meetup_oauth_secret}\""
-        buildConfigField "String", "MEETUP_OAUTH_REDIRECT_URI", "\"${meetup_oauth_redirect_uri}\""
+        buildConfigField "String", "MEETUP_OAUTH_KEY", "\"${props.meetup_oauth_key}\""
+        buildConfigField "String", "MEETUP_OAUTH_SECRET", "\"${props.meetup_oauth_secret}\""
+        buildConfigField "String", "MEETUP_OAUTH_REDIRECT_URI", "\"${props.meetup_oauth_redirect_uri}\""
 
 
         // preference values
@@ -108,6 +111,7 @@ dependencies {
 
     // firebase
     compile "com.google.firebase:firebase-invites:${libs.firebase}"
+    compile "com.google.firebase:firebase-crash:${libs.firebase}"
     compile "com.firebase:firebase-jobdispatcher:${libs.firebase_jobdispatcher}"
 
     // google
