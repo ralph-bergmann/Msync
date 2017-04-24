@@ -14,7 +14,7 @@ android {
 
     playAccountConfigs {
         defaultAccountConfig {
-            jsonFile = file('./keystore/keys.json')
+            jsonFile = file('../keystore/keys.json')
         }
     }
 
