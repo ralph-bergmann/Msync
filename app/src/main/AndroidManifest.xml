@@ -16,8 +16,25 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="false">
 
+        <activity
+            android:name=".ui.CheckLoginStatusActivity"
+            android:theme="@android:style/Theme.NoDisplay"/>
+
         <activity android:name=".ui.LoginActivity"/>
 
+        <activity
+            android:name=".ui.SettingsActivity"
+            android:label="@string/title_activity_settings"/>
+
+        <activity
+            android:name=".ui.PrefActionsActivity"
+            android:theme="@android:style/Theme.NoDisplay">
+            <intent-filter>
+                <action android:name="eu.the4thfloor.msync.PREF_ACTION"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:scheme="msync"/>
+            </intent-filter>
+        </activity>
 
         <!--
             use an alias in case we want to change the launch activity later without breaking
@@ -26,7 +43,7 @@
         <activity-alias
             android:name=".Launcher"
             android:label="@string/app_name"
-            android:targetActivity=".ui.LoginActivity">
+            android:targetActivity=".ui.CheckLoginStatusActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 

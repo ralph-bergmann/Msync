@@ -21,6 +21,7 @@ buildscript {
 
     ext.libs = [
         anko                    : "0.10.0-beta-2",
+        colorpicker             : "1.0.0",
         dagger2                 : '2.10',
         firebase_jobdispatcher  : '0.6.0',
         jsr305                  : "3.0.1",

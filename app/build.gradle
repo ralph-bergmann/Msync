@@ -24,6 +24,19 @@ android {
         buildConfigField "String", "MEETUP_OAUTH_KEY", "\"${meetup_oauth_key}\""
         buildConfigField "String", "MEETUP_OAUTH_SECRET", "\"${meetup_oauth_secret}\""
         buildConfigField "String", "MEETUP_OAUTH_REDIRECT_URI", "\"${meetup_oauth_redirect_uri}\""
+
+
+        // preference values
+
+        // if you change one of the following two values you have to change them in the Manifest too
+        def actionScheme = "msync"
+        def actionName = "eu.the4thfloor.msync.PREF_ACTION"
+
+        resValue "string", "pref_action", actionName
+
+        def prefActionSyncNow = actionScheme + "://SYNC_NOW"
+        resValue "string", "pref_action_sync_now", "${prefActionSyncNow}"
+        buildConfigField "String", "PREF_ACTION_SYNC_NOW", "\"${prefActionSyncNow}\""
     }
 
     if (cfg.hasKeyfile) {
@@ -125,6 +138,9 @@ dependencies {
     // dagger2
     compile "com.google.dagger:dagger:${libs.dagger2}"
     kapt "com.google.dagger:dagger-compiler:${libs.dagger2}"
+
+    // ColorPickerPreference
+    compile "net.margaritov.preference.colorpicker.ColorPickerPreference:ColorPickerPreference:${libs.colorpicker}"
 }
 
 

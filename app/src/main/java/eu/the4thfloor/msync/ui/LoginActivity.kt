@@ -29,6 +29,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_login.*
 import org.jetbrains.anko.defaultSharedPreferences
+import org.jetbrains.anko.startActivity
 import retrofit2.Retrofit
 import timber.log.Timber
 import java.lang.ref.WeakReference
@@ -167,7 +168,7 @@ class LoginActivity : Activity() {
     private fun handleAccessResponse(response: AccessResponse) {
         defaultSharedPreferences.apply(PREF_ACCESS_TOKEN to response.access_token,
                                        PREF_REFRESH_TOKEN to response.refresh_token)
-        // TODO open next view
+        startActivity<SettingsActivity>()
     }
 
     private fun showError() {
