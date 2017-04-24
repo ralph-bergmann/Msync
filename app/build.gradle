@@ -12,6 +12,12 @@ android {
     compileSdkVersion cfg.compileVersion
     buildToolsVersion cfg.buildToolsVersion
 
+    playAccountConfigs {
+        defaultAccountConfig {
+            jsonFile = file('./keystore/keys.json')
+        }
+    }
+
     defaultConfig {
 
         applicationId cfg.package
@@ -45,6 +51,8 @@ android {
         addConstant("pref_action_sync_now", actionScheme + "://SYNC_NOW")
         addConstant("pref_action_share_google_plus", actionScheme + "://SHARE_GOOGLE_PLUS")
         addConstant("pref_action_share_firebase", actionScheme + "://SHARE_FIREBASE")
+
+        playAccountConfig = playAccountConfigs.defaultAccountConfig
     }
 
     if (cfg.hasKeyfile) {
@@ -164,8 +172,8 @@ task testAndRelease
 task archiveRelease(type: Copy) {
     from './build/outputs/apk', './build/outputs/'
     into "../releases/${rootProject.ext.configuration.version_code}"
-    include('app--release.apk', 'mapping/release/mapping.txt')
-    rename('app--release.apk', "${rootProject.ext.configuration.package}_${rootProject.ext.configuration.version_name}_${rootProject.ext.configuration.version_code}.apk")
+    include('app-release.apk', 'mapping/release/mapping.txt')
+    rename('app-release.apk', "${rootProject.ext.configuration.package}_${rootProject.ext.configuration.version_name}_${rootProject.ext.configuration.version_code}.apk")
 }
 
 project.afterEvaluate {
