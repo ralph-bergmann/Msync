@@ -1,0 +1,194 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.github.triplet.play'
+apply plugin: 'com.github.ben-manes.versions'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+
+def cfg = rootProject.ext.configuration
+def libs = rootProject.ext.libs
+
+android {
+    compileSdkVersion cfg.compileVersion
+    buildToolsVersion cfg.buildToolsVersion
+
+    playAccountConfigs {
+        defaultAccountConfig {
+            jsonFile = file('./keystore/keys.json')
+        }
+    }
+
+    defaultConfig {
+
+        applicationId cfg.package
+        minSdkVersion cfg.minSdk
+        targetSdkVersion cfg.targetSdk
+        versionCode cfg.version_code
+        versionName cfg.version_name
+
+        Properties props = new Properties()
+        props.load(new FileInputStream('./keystore/meetup.properties'))
+
+        resConfig "en"
+        buildConfigField "String", "MEETUP_OAUTH_KEY", "\"${props.meetup_oauth_key}\""
+        buildConfigField "String", "MEETUP_OAUTH_SECRET", "\"${props.meetup_oauth_secret}\""
+        buildConfigField "String", "MEETUP_OAUTH_REDIRECT_URI", "\"${props.meetup_oauth_redirect_uri}\""
+
+
+        // preference values
+
+        def actionScheme = "msync"
+        def actionName = cfg.package + ".PREF_ACTION"
+
+        resValue "string", "pref_action", actionName
+        manifestPlaceholders = [actionName: actionName, actionScheme: actionScheme]
+
+        def addConstant = { key, value ->
+            resValue "string", key, "$value"
+            buildConfigField "String", key.toUpperCase(), "\"$value\""
+        }
+
+        addConstant("pref_action_sync_now", actionScheme + "://SYNC_NOW")
+        addConstant("pref_action_share_google_plus", actionScheme + "://SHARE_GOOGLE_PLUS")
+        addConstant("pref_action_share_firebase", actionScheme + "://SHARE_FIREBASE")
+
+        playAccountConfig = playAccountConfigs.defaultAccountConfig
+    }
+
+    if (cfg.hasKeyfile) {
+        signingConfigs {
+            release {
+                keyAlias project.signing.keyAlias
+                keyPassword project.signing.keyPassword
+                storeFile file(project.signing.storeFilePath)
+                storePassword project.signing.storePassword
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug (Build: ${cfg.gitSha})"
+            signingConfig signingConfigs.debug
+        }
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
+            if (cfg.hasKeyfile)
+                signingConfig signingConfigs.release
+            else
+                signingConfig android.signingConfigs.debug
+        }
+    }
+
+    packagingOptions {
+        exclude '.readme'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'LICENSE.txt'
+        exclude 'LICENSE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'NOTICE.txt'
+        exclude 'NOTICE'
+        exclude 'META-INF/services/javax.annotation.processing.Processor'
+
+        exclude 'kotlin/**'
+        exclude 'META-INF/*.kotlin_module'
+    }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
+
+    dexOptions {
+        dexInProcess true
+        maxProcessCount 4
+        javaMaxHeapSize "3g"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+
+    // firebase
+    compile "com.google.firebase:firebase-invites:${libs.firebase}"
+    compile "com.google.firebase:firebase-crash:${libs.firebase}"
+    compile "com.firebase:firebase-jobdispatcher:${libs.firebase_jobdispatcher}"
+
+    // google
+    compile "com.google.android.gms:play-services-plus:${libs.play_services}"
+
+    // kotlin
+    compile "org.jetbrains.kotlin:kotlin-stdlib:${libs.kotlin}"
+
+    // anko
+    compile "org.jetbrains.anko:anko-sdk15:${libs.anko}" // sdk19, sdk21, sdk23 are also available
+
+    // timber
+    compile "com.jakewharton.timber:timber:${libs.timber}"
+
+    // threetenabp
+    compile "com.jakewharton.threetenabp:threetenabp:${libs.threetenabp}"
+
+    // stetho
+    debugCompile "com.facebook.stetho:stetho:${libs.stetho}"
+    debugCompile "com.facebook.stetho:stetho-okhttp3:${libs.stetho}"
+
+    // rx
+    compile "io.reactivex.rxjava2:rxjava:${libs.rxjava}"
+    compile "io.reactivex.rxjava2:rxandroid:${libs.rxandroid}"
+
+    // retrofit
+    compile "com.squareup.retrofit2:retrofit:${libs.retrofit}"
+    compile "com.squareup.retrofit2:converter-moshi:${libs.retrofit}"
+    compile "com.jakewharton.retrofit:retrofit2-rxjava2-adapter:${libs.retrofit_rxjava2_adapter}"
+    debugCompile "com.squareup.okhttp3:logging-interceptor:${libs.okhttp_logging}"
+
+    // leakcanary
+    debugCompile "com.squareup.leakcanary:leakcanary-android:${libs.leakcanary}"
+    testCompile "com.squareup.leakcanary:leakcanary-android-no-op:${libs.leakcanary}"
+    androidTestCompile "com.squareup.leakcanary:leakcanary-android-no-op:${libs.leakcanary}"
+    releaseCompile "com.squareup.leakcanary:leakcanary-android-no-op:${libs.leakcanary}"
+
+    // dagger2
+    compile "com.google.dagger:dagger:${libs.dagger2}"
+    kapt "com.google.dagger:dagger-compiler:${libs.dagger2}"
+
+    // ColorPickerPreference
+    compile "net.margaritov.preference.colorpicker.ColorPickerPreference:ColorPickerPreference:${libs.colorpicker}"
+}
+
+
+task release
+task testAndRelease
+
+task archiveRelease(type: Copy) {
+    from './build/outputs/apk', './build/outputs/'
+    into "../releases/${rootProject.ext.configuration.version_code}"
+    include('app-release.apk', 'mapping/release/mapping.txt')
+    rename('app-release.apk', "${rootProject.ext.configuration.package}_${rootProject.ext.configuration.version_name}_${rootProject.ext.configuration.version_code}.apk")
+}
+
+project.afterEvaluate {
+
+    dependencyUpdates.dependsOn clean
+    assembleRelease.dependsOn clean
+
+    def publishApkRelease = project.tasks.getByName("publishApkRelease")
+    publishApkRelease.dependsOn assembleRelease
+
+    archiveRelease.dependsOn assembleRelease
+
+    release.dependsOn publishApkRelease, archiveRelease
+    testAndRelease.dependsOn lint, test, connectedAndroidTest, release
+}
+
+// ADD THIS AT THE BOTTOM
+apply plugin: 'com.google.gms.google-services'

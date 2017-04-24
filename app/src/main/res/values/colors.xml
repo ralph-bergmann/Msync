@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">@color/red</color>
+    <color name="colorPrimaryDark">@color/shiraz</color>
+    <color name="colorAccent">@color/red</color>
+
+    <color name="red">#ED1C40</color>
+    <color name="shiraz">#AB0F29</color>
+    <color name="alabaster">#FAFAFA</color>
+
+</resources>

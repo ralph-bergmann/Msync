@@ -32,9 +32,24 @@ proguard/
 # Android Studio captures folder
 captures/
 
-# Intellij
-*.iml
-.idea/workspace.xml
-
 # Keystore files
 *.jks
+
+# External native build folder generated in Android Studio 2.2 and later
+.externalNativeBuild
+
+# Intellij - https://intellij-support.jetbrains.com/hc/en-us/articles/206544839-How-to-manage-projects-under-Version-Control-Systems
+*.iml
+/.idea/dictionaries/
+/.idea/libraries/
+/.idea/misc.xml
+/.idea/workspace.xml
+/.idea/tasks.xml
+
+/keystore
+/releases
+/stuff
+/app/google-services.json
+
+# osx
+.DS_Store

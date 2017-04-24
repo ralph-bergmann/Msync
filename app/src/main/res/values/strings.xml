@@ -1,0 +1,50 @@
+<resources>
+    <string name="app_name">Msync</string>
+    <string name="title_activity_settings">Msync Settings</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- calendar settings -->
+    <string name="pref_header_calendar">Calendar</string>
+    <string name="pref_title_calendar_name">Calendar name</string>
+    <string name="pref_default_calendar_name">Meetup</string>
+    <string name="pref_title_calendar_color">Calendar color</string>
+    <string name="pref_default_calendar_color">#ED1C40</string>
+
+    <string name="pref_title_sync_frequency">Sync frequency</string>
+    <string-array name="pref_sync_frequency_titles">
+        <item>1 hour</item>
+        <item>3 hours</item>
+        <item>6 hours</item>
+        <item>12 hours</item>
+        <item>24 hours</item>
+        <item>Never</item>
+    </string-array>
+    <string-array name="pref_sync_frequency_values">
+        <item>180</item>
+        <item>360</item>
+        <item>720</item>
+        <item>1440</item>
+        <item>-1</item>
+    </string-array>
+
+    <string name="pref_title_calendar_sync_now">Sync now</string>
+
+
+    <!-- share and invite settings -->
+    <string name="pref_header_share_and_invite">Share and Invite</string>
+
+    <string name="pref_title_share_google_plus">Share on G+</string>
+    <string name="pref_title_share_firebase">Invite friends</string>
+
+
+    <!-- g+ share -->
+    <string name="google_plus_share_message">Try out Msync for Android. Sync your Meetup events into your Android calendar.</string>
+
+    <!-- firebase app invites -->
+    <string name="firebase_app_invite_title">Share with Firebase</string>
+    <string name="firebase_app_invite_message">Try out Msync for Android. Sync your Meetup events into your Android calendar.</string>
+    <string name="firebase_app_invite_email_subject">Try out Msync for Android.</string>
+    <string name="firebase_app_invite_email_html"><![CDATA[<a target="_top" href="%%APPINVITE_LINK_PLACEHOLDER%%,">Install Msync for Android.</a>]]></string>
+
+</resources>

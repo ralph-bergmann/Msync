@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="@string/pref_header_calendar"
+        android:key="pref_key_calendar_settings">
+
+        <EditTextPreference
+            android:capitalize="words"
+            android:defaultValue="@string/pref_default_calendar_name"
+            android:inputType="textCapWords"
+            android:key="example_text"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/pref_title_calendar_name"/>
+
+        <net.margaritov.preference.colorpicker.ColorPickerPreference
+            android:key="color1"
+            android:title="@string/pref_title_calendar_color"
+            android:defaultValue="@color/red"/>
+
+        <ListPreference
+            android:defaultValue="1440"
+            android:entries="@array/pref_sync_frequency_titles"
+            android:entryValues="@array/pref_sync_frequency_values"
+            android:key="sync_frequency"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"
+            android:title="@string/pref_title_sync_frequency"/>
+
+        <PreferenceScreen
+            android:title="@string/pref_title_calendar_sync_now">
+            <intent
+                android:action="@string/pref_action"
+                android:data="@string/pref_action_sync_now"/>
+        </PreferenceScreen>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_header_share_and_invite"
+        android:key="pref_key_share_settings">
+
+        <PreferenceScreen
+            android:title="@string/pref_title_share_google_plus">
+            <intent
+                android:action="@string/pref_action"
+                android:data="@string/pref_action_share_google_plus"/>
+        </PreferenceScreen>
+
+        <PreferenceScreen
+            android:title="@string/pref_title_share_firebase">
+            <intent
+                android:action="@string/pref_action"
+                android:data="@string/pref_action_share_firebase"/>
+        </PreferenceScreen>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -1,0 +1,8 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="android:Theme.Light">
+        <item name="android:colorBackground">@color/alabaster</item>
+    </style>
+
+</resources>
