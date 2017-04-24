@@ -30,9 +30,9 @@
             android:name=".ui.PrefActionsActivity"
             android:theme="@android:style/Theme.NoDisplay">
             <intent-filter>
-                <action android:name="eu.the4thfloor.msync.PREF_ACTION"/>
+                <action android:name="${actionName}"/>
                 <category android:name="android.intent.category.DEFAULT"/>
-                <data android:scheme="msync"/>
+                <data android:scheme="${actionScheme}"/>
             </intent-filter>
         </activity>
 

@@ -28,15 +28,20 @@ android {
 
         // preference values
 
-        // if you change one of the following two values you have to change them in the Manifest too
         def actionScheme = "msync"
-        def actionName = "eu.the4thfloor.msync.PREF_ACTION"
+        def actionName = cfg.package + ".PREF_ACTION"
 
         resValue "string", "pref_action", actionName
+        manifestPlaceholders = [actionName: actionName, actionScheme: actionScheme]
 
-        def prefActionSyncNow = actionScheme + "://SYNC_NOW"
-        resValue "string", "pref_action_sync_now", "${prefActionSyncNow}"
-        buildConfigField "String", "PREF_ACTION_SYNC_NOW", "\"${prefActionSyncNow}\""
+        def addConstant = { key, value ->
+            resValue "string", key, "$value"
+            buildConfigField "String", key.toUpperCase(), "\"$value\""
+        }
+
+        addConstant("pref_action_sync_now", actionScheme + "://SYNC_NOW")
+        addConstant("pref_action_share_google_plus", actionScheme + "://SHARE_GOOGLE_PLUS")
+        addConstant("pref_action_share_firebase", actionScheme + "://SHARE_FIREBASE")
     }
 
     if (cfg.hasKeyfile) {
@@ -101,7 +106,12 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
 
+    // firebase
+    compile "com.google.firebase:firebase-invites:${libs.firebase}"
     compile "com.firebase:firebase-jobdispatcher:${libs.firebase_jobdispatcher}"
+
+    // google
+    compile "com.google.android.gms:play-services-plus:${libs.play_services}"
 
     // kotlin
     compile "org.jetbrains.kotlin:kotlin-stdlib:${libs.kotlin}"
@@ -167,3 +177,6 @@ project.afterEvaluate {
     release.dependsOn publishApkRelease, archiveRelease
     testAndRelease.dependsOn lint, test, connectedAndroidTest, release
 }
+
+// ADD THIS AT THE BOTTOM
+apply plugin: 'com.google.gms.google-services'

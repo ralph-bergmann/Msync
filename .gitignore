@@ -49,6 +49,7 @@ captures/
 /keystore
 /releases
 /stuff
+/app/google-services.json
 
 # osx
 .DS_Store
