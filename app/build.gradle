@@ -153,8 +153,6 @@ dependencies {
 
     // leakcanary
     debugCompile "com.squareup.leakcanary:leakcanary-android:${libs.leakcanary}"
-    testCompile "com.squareup.leakcanary:leakcanary-android-no-op:${libs.leakcanary}"
-    androidTestCompile "com.squareup.leakcanary:leakcanary-android-no-op:${libs.leakcanary}"
     releaseCompile "com.squareup.leakcanary:leakcanary-android-no-op:${libs.leakcanary}"
 
     // dagger2
@@ -167,7 +165,6 @@ dependencies {
 
 
 task release
-task testAndRelease
 
 task archiveRelease(type: Copy) {
     from './build/outputs/apk', './build/outputs/'
@@ -187,7 +184,6 @@ project.afterEvaluate {
     archiveRelease.dependsOn assembleRelease
 
     release.dependsOn publishApkRelease, archiveRelease
-    testAndRelease.dependsOn lint, test, connectedAndroidTest, release
 }
 
 // ADD THIS AT THE BOTTOM

@@ -33,6 +33,10 @@
 
 # square retrofit2
 -dontwarn retrofit2.**
+-keep class retrofit2.** { *; }
+-keepclasseswithmembers class * {
+    @retrofit2.http.* <methods>;
+}
 
 
 # kotlin
