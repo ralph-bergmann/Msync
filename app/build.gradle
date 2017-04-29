@@ -33,6 +33,7 @@ android {
         buildConfigField "String", "MEETUP_OAUTH_KEY", "\"${props.meetup_oauth_key}\""
         buildConfigField "String", "MEETUP_OAUTH_SECRET", "\"${props.meetup_oauth_secret}\""
         buildConfigField "String", "MEETUP_OAUTH_REDIRECT_URI", "\"${props.meetup_oauth_redirect_uri}\""
+        buildConfigField "String", "FIREBASE_DEEPLINK", "\"${props.firebase_deeplink}\""
 
 
         // preference values
@@ -51,6 +52,8 @@ android {
         addConstant("pref_action_sync_now", actionScheme + "://SYNC_NOW")
         addConstant("pref_action_share_google_plus", actionScheme + "://SHARE_GOOGLE_PLUS")
         addConstant("pref_action_share_firebase", actionScheme + "://SHARE_FIREBASE")
+        addConstant("account_type", cfg.package)
+        addConstant("auth_token_type", cfg.package)
 
         playAccountConfig = playAccountConfigs.defaultAccountConfig
     }

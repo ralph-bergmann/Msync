@@ -5,18 +5,25 @@ import android.net.Uri
 import android.os.Bundle
 import com.google.android.gms.appinvite.AppInviteInvitation
 import com.google.android.gms.plus.PlusShare
+import com.google.firebase.analytics.FirebaseAnalytics
 import eu.the4thfloor.msync.BuildConfig
 import eu.the4thfloor.msync.BuildConfig.PREF_ACTION_SHARE_FIREBASE
 import eu.the4thfloor.msync.BuildConfig.PREF_ACTION_SHARE_GOOGLE_PLUS
 import eu.the4thfloor.msync.BuildConfig.PREF_ACTION_SYNC_NOW
+import eu.the4thfloor.msync.MSyncApp
 import eu.the4thfloor.msync.R
 import org.jetbrains.anko.longToast
+import javax.inject.Inject
 
 
 class PrefActionsActivity : Activity() {
 
+    @Inject lateinit var fa: FirebaseAnalytics
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        MSyncApp.graph.inject(this)
 
         intent?.dataString?.let {
             if (PREF_ACTION_SYNC_NOW.equals(it, ignoreCase = true)) {
@@ -25,17 +32,19 @@ class PrefActionsActivity : Activity() {
                 val shareIntent = PlusShare.Builder(this)
                     .setType("text/plain")
                     .setText(getString(R.string.google_plus_share_message))
-                    .setContentUrl(Uri.parse("https://expa8.app.goo.gl/?apn=" + BuildConfig.APPLICATION_ID))
+                    .setContentUrl(Uri.parse(BuildConfig.FIREBASE_DEEPLINK))
                     .intent
                 startActivity(shareIntent)
+                fa.logEvent("share_on_google_plus", null)
             } else if (PREF_ACTION_SHARE_FIREBASE.equals(it, ignoreCase = true)) {
                 val intent = AppInviteInvitation.IntentBuilder(getString(R.string.firebase_app_invite_title))
                     .setMessage(getString(R.string.firebase_app_invite_message))
-                    .setDeepLink(Uri.parse("https://expa8.app.goo.gl/?apn=" + BuildConfig.APPLICATION_ID))
+                    .setDeepLink(Uri.parse(BuildConfig.FIREBASE_DEEPLINK))
                     .setEmailSubject(getString(R.string.firebase_app_invite_email_subject))
                     .setEmailHtmlContent(getString(R.string.firebase_app_invite_email_html))
                     .build()
                 startActivityForResult(intent, 0)
+                fa.logEvent("invite_friends", null)
             }
         }
 

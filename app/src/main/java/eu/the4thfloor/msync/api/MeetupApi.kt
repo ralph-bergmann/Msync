@@ -1,14 +1,15 @@
 package eu.the4thfloor.msync.api
 
-import eu.the4thfloor.msync.api.models.AccessResponse
-import io.reactivex.Observable
-import retrofit2.http.FieldMap
-import retrofit2.http.FormUrlEncoded
-import retrofit2.http.POST
+import eu.the4thfloor.msync.api.models.SelfResponse
+import io.reactivex.Flowable
+import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.Headers
 
 interface MeetupApi {
 
-    @POST("access")
-    @FormUrlEncoded
-    fun access(@FieldMap(encoded = true) params: Map<String, String>): Observable<AccessResponse>
+
+    @GET("2/member/self/")
+    @Headers("Accept: application/json")
+    fun self(@Header("Authorization") access_token: String): Flowable<SelfResponse>
 }

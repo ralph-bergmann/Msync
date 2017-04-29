@@ -23,13 +23,13 @@ buildscript {
         anko                    : "0.10.0-beta-2",
         colorpicker             : "1.0.0",
         dagger2                 : '2.11-rc1',
-        firebase                : "10.2.1",
+        firebase                : "10.2.4",
         firebase_jobdispatcher  : '0.6.0',
         jsr305                  : "3.0.1",
-        kotlin                  : "1.1.2",
-        leakcanary              : "1.5",
+        kotlin                  : "1.1.2-2",
+        leakcanary              : "1.5.1",
         okhttp_logging          : "3.7.0",
-        play_services           : "10.2.1",
+        play_services           : "10.2.4",
         retrofit                : "2.2.0",
         retrofit_rxjava2_adapter: "1.0.0",
         rxandroid               : "2.0.1",
@@ -48,7 +48,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.4.0-alpha6'
+        classpath 'com.android.tools.build:gradle:2.4.0-alpha7'
         classpath 'com.google.gms:google-services:3.0.0'
         classpath 'com.github.triplet.gradle:play-publisher:1.2.0'
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.14.0'
