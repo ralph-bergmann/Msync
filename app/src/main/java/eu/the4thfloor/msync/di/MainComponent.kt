@@ -2,6 +2,7 @@ package eu.the4thfloor.msync.di
 
 import dagger.Component
 import eu.the4thfloor.msync.ui.LoginActivity
+import eu.the4thfloor.msync.ui.PrefActionsActivity
 import javax.inject.Singleton
 
 @Singleton
@@ -9,6 +10,7 @@ import javax.inject.Singleton
 interface MainComponent {
 
     fun inject(loginActivity: LoginActivity)
+    fun inject(prefActionsActivity: PrefActionsActivity)
 
     object Initializer {
 

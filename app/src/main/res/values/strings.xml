@@ -21,6 +21,7 @@
         <item>Never</item>
     </string-array>
     <string-array name="pref_sync_frequency_values">
+        <item>60</item>
         <item>180</item>
         <item>360</item>
         <item>720</item>
@@ -29,6 +30,10 @@
     </string-array>
 
     <string name="pref_title_calendar_sync_now">Sync now</string>
+
+    <string name="pref_key_calendar_name">calendar_name</string>
+    <string name="pref_key_calendar_color">calendar_color</string>
+    <string name="pref_key_sync_frequency">sync_frequency</string>
 
 
     <!-- share and invite settings -->

@@ -1,74 +1,62 @@
 package eu.the4thfloor.msync.ui
 
-import android.annotation.TargetApi
-import android.app.Activity
+import android.Manifest
+import android.accounts.Account
+import android.accounts.AccountAuthenticatorActivity
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.support.annotation.RequiresApi
+import android.support.annotation.RequiresPermission
 import android.view.View
 import android.view.Window
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import com.google.firebase.crash.FirebaseCrash
 import com.jakewharton.retrofit2.adapter.rxjava2.HttpException
+import com.squareup.moshi.Moshi
 import eu.the4thfloor.msync.BuildConfig.MEETUP_OAUTH_KEY
 import eu.the4thfloor.msync.BuildConfig.MEETUP_OAUTH_REDIRECT_URI
 import eu.the4thfloor.msync.BuildConfig.MEETUP_OAUTH_SECRET
 import eu.the4thfloor.msync.MSyncApp
 import eu.the4thfloor.msync.R
 import eu.the4thfloor.msync.api.MeetupApi
-import eu.the4thfloor.msync.api.models.AccessErrorResponse
+import eu.the4thfloor.msync.api.SecureApi
 import eu.the4thfloor.msync.api.models.AccessResponse
-import eu.the4thfloor.msync.utils.PREF_ACCESS_TOKEN
-import eu.the4thfloor.msync.utils.PREF_REFRESH_TOKEN
-import eu.the4thfloor.msync.utils.apply
-import io.reactivex.Observable
+import eu.the4thfloor.msync.api.models.CreateAccountResponse
+import eu.the4thfloor.msync.api.models.ErrorResponse
+import eu.the4thfloor.msync.api.models.Response
+import eu.the4thfloor.msync.api.models.SelfResponse
+import eu.the4thfloor.msync.utils.checkSelfPermission
+import eu.the4thfloor.msync.utils.createAccount
+import eu.the4thfloor.msync.utils.createCalendar
+import eu.the4thfloor.msync.utils.doFromSdk
+import eu.the4thfloor.msync.utils.getCalendarID
+import io.reactivex.Flowable
+import io.reactivex.FlowableTransformer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.processors.PublishProcessor
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_login.*
-import org.jetbrains.anko.defaultSharedPreferences
-import org.jetbrains.anko.startActivity
-import retrofit2.Retrofit
 import timber.log.Timber
 import java.lang.ref.WeakReference
-import java.util.*
 import javax.inject.Inject
 
-class LoginActivity : Activity() {
+class LoginActivity : AccountAuthenticatorActivity() {
 
-    @Inject lateinit var retrofit: Retrofit
-    @Inject lateinit var api: MeetupApi
+    @Inject lateinit var secureApi: SecureApi
+    @Inject lateinit var meetupApi: MeetupApi
+    @Inject lateinit var moshi: Moshi
 
     private val disposables = CompositeDisposable()
-    private val submitTransformer =
-        { observable: Observable<SubmitEvent> ->
-            observable
-                .flatMap { (code) ->
-                    api.access(mapOf("client_id" to MEETUP_OAUTH_KEY,
-                                     "client_secret" to MEETUP_OAUTH_SECRET,
-                                     "redirect_uri" to MEETUP_OAUTH_REDIRECT_URI,
-                                     "code" to code,
-                                     "grant_type" to "authorization_code"))
-                        .map { response -> SubmitUiModel.success(response) }
-                        .onErrorReturn { t ->
-                            SubmitUiModel.failure(if (t is HttpException) {
-                                                      retrofit
-                                                          .responseBodyConverter<AccessErrorResponse>(AccessErrorResponse::class.java,
-                                                                                                      arrayOfNulls<Annotation>(0))
-                                                          .convert(t.response().errorBody())
-                                                  } else {
-                                                      null
-                                                  })
-                        }
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .startWith(SubmitUiModel.inProgress())
-                }
-        }
+    private val event = PublishProcessor.create<Event>()
 
-    private var state: String? = null
+    private var refreshToken: String? = null
+    private var account: Account? = null
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -85,7 +73,6 @@ class LoginActivity : Activity() {
                                     MyWebViewClient(this)
                                 })
 
-            state = Uri.encode(state())
             val url = Uri.Builder()
                 .scheme("https")
                 .authority("secure.meetup.com")
@@ -96,12 +83,116 @@ class LoginActivity : Activity() {
                 .appendQueryParameter("response_type", "code")
                 .appendQueryParameter("scope", "rsvp")
                 .appendQueryParameter("set_mobile", "on")
-                .appendQueryParameter("state", state)
                 .build().toString()
 
             Timber.i("request: %s", url)
             it.loadUrl(url)
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        val accessTransformer =
+            { flowable: Flowable<Event.Access> ->
+                flowable
+                    .flatMap { access ->
+                        secureApi.access(mapOf("client_id" to MEETUP_OAUTH_KEY,
+                                               "client_secret" to MEETUP_OAUTH_SECRET,
+                                               "redirect_uri" to MEETUP_OAUTH_REDIRECT_URI,
+                                               "code" to access.code,
+                                               "grant_type" to "authorization_code"))
+                            .map { response -> ResponseModel.success(response) }
+                            .onErrorReturn { t ->
+                                ResponseModel.failure(if (t is HttpException) {
+                                    moshi
+                                        .adapter(ErrorResponse::class.java)
+                                        .fromJson(t.response().errorBody().string())
+                                } else {
+                                    null
+                                })
+                            }
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .startWith(ResponseModel.inProgress())
+                    }
+            }
+
+        val selfTransformer =
+            { flowable: Flowable<Event.Self> ->
+                flowable
+                    .flatMap { self ->
+                        meetupApi.self("Bearer ${self.accessToken}")
+                            .map { response -> ResponseModel.success(response) }
+                            .onErrorReturn { t ->
+                                ResponseModel.failure(if (t is HttpException) {
+                                    moshi
+                                        .adapter(ErrorResponse::class.java)
+                                        .fromJson(t.response().errorBody().string())
+                                } else {
+                                    null
+                                })
+                            }
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .startWith(ResponseModel.inProgress())
+                    }
+            }
+
+        val createAccountTransformer =
+            { flowable: Flowable<Event.CreateAccount> ->
+                flowable
+                    .map { createAccount ->
+                        val account = createAccount(createAccount.name, createAccount.refreshToken)
+                        ResponseModel.success(CreateAccountResponse(account))
+                    }
+                    .startWith(ResponseModel.inProgress())
+            }
+
+        val eventTransformer = FlowableTransformer<Event, ResponseModel<Response>> { flowable ->
+            flowable
+                .publish({ shared ->
+                             Flowable.merge(
+                                 shared.ofType(Event.Access::class.java).compose(accessTransformer),
+                                 shared.ofType(Event.Self::class.java).compose(selfTransformer),
+                                 shared.ofType(Event.CreateAccount::class.java).compose(createAccountTransformer))
+                         })
+        }
+
+        disposables
+            .add(event
+                     .compose(eventTransformer)
+                     .subscribe({ (inProgress, success, response, error) ->
+                                    progressBar.visibility = if (inProgress) View.VISIBLE else View.GONE
+                                    if (!inProgress) {
+                                        if (success && response != null) {
+                                            when (response) {
+                                                is AccessResponse -> {
+                                                    Timber.i("success %s", response.access_token)
+                                                    handleResponse(response)
+                                                }
+                                                is SelfResponse -> {
+                                                    Timber.i("self %s", response)
+                                                    handleResponse(response)
+                                                }
+                                                is CreateAccountResponse -> {
+                                                    Timber.i("account %s", response)
+                                                    handleResponse(response)
+                                                }
+                                            }
+                                        } else {
+                                            Timber.e("!success %s", error)
+                                            FirebaseCrash.report(Exception(error?.error_description))
+                                            showError()
+                                        }
+                                    }
+                                },
+                                { error ->
+                                    Timber.e(error, "failed to access api")
+                                    progressBar.visibility = View.GONE
+                                    FirebaseCrash.report(error)
+                                    showError()
+                                }))
     }
 
     override fun onStop() {
@@ -123,11 +214,6 @@ class LoginActivity : Activity() {
             return false
         }
 
-        if (uri.getQueryParameter("state") != state) {
-            // TODO state is wrong
-            return false
-        }
-
         return uri.getQueryParameter("code")?.let {
             loadToken(it)
             true
@@ -143,48 +229,65 @@ class LoginActivity : Activity() {
     }
 
     private fun loadToken(code: String) {
-        disposables
-            .add(Observable
-                     .just(SubmitEvent(code))
-                     .compose(submitTransformer)
-                     .subscribe({ (inProgress, success, response, error) ->
-                                    progressBar.visibility = if (inProgress) View.VISIBLE else View.GONE
-                                    if (!inProgress) {
-                                        if (success && response != null) {
-                                            Timber.i("success %s", response.access_token)
-                                            handleAccessResponse(response)
-                                        } else {
-                                            Timber.e("!success %s", error)
-                                            showError()
-                                        }
-                                    }
-                                },
-                                { error ->
-                                    Timber.e(error, "onCreate: ")
-                                    showError()
-                                }))
+        event.onNext(Event.Access(code))
     }
 
-    private fun handleAccessResponse(response: AccessResponse) {
-        defaultSharedPreferences.apply(PREF_ACCESS_TOKEN to response.access_token,
-                                       PREF_REFRESH_TOKEN to response.refresh_token)
-        startActivity<SettingsActivity>()
+    private fun handleResponse(response: AccessResponse) {
+        refreshToken = response.refresh_token
+        event.onNext(Event.Self(response.access_token!!))
+    }
+
+    private fun handleResponse(response: SelfResponse) {
+        event.onNext(Event.CreateAccount(refreshToken!!, response.name!!))
+    }
+
+    private fun handleResponse(response: CreateAccountResponse) {
+        account = response.account
+        doFromSdk(Build.VERSION_CODES.M,
+                  {
+                      checkCalendarPermissions()
+                  },
+                  {
+                      createCalendar()
+                  })
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun checkCalendarPermissions() {
+        if (checkSelfPermission(Manifest.permission.READ_CALENDAR,
+                                Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(Manifest.permission.READ_CALENDAR,
+                                       Manifest.permission.WRITE_CALENDAR), 0)
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        when (requestCode) {
+            0 -> {
+                if (grantResults.size == 2
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                    && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+
+                    createCalendar()
+                }
+            }
+        }
+    }
+
+    @RequiresPermission(allOf = arrayOf(Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR))
+    private fun createCalendar() {
+        val calendarId = getCalendarID(account!!) ?: createCalendar(account!!)
+        Timber.i("calendarId: $calendarId")
     }
 
     private fun showError() {
         // TODO
     }
 
-    fun state(): String =
-        StringBuilder().apply {
-            val generator = Random()
-            for (i in 0..32) {
-                append((generator.nextInt(93) + 33).toChar())
-            }
-        }.toString()
-
     private class MyWebViewClient(activity: LoginActivity,
-                                  val ref: WeakReference<LoginActivity> = WeakReference(activity)) : WebViewClient() {
+                                  private val ref: WeakReference<LoginActivity> = WeakReference(activity)) : WebViewClient() {
 
 
         override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean =
@@ -199,9 +302,9 @@ class LoginActivity : Activity() {
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.N)
+    @RequiresApi(Build.VERSION_CODES.N)
     private class MyWebViewClientNougat(activity: LoginActivity,
-                                        val ref: WeakReference<LoginActivity> = WeakReference(activity)) : WebViewClient() {
+                                        private val ref: WeakReference<LoginActivity> = WeakReference(activity)) : WebViewClient() {
 
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean =
             ref.get()?.handleUri(request.url) ?: false
@@ -216,16 +319,20 @@ class LoginActivity : Activity() {
     }
 }
 
-data class SubmitEvent(val code: String)
+sealed class Event {
+    class Access(val code: String) : Event()
+    class Self(val accessToken: String) : Event()
+    class CreateAccount(val refreshToken: String, val name: String) : Event()
+}
 
-data class SubmitUiModel(val inProgress: Boolean = false,
-                         val success: Boolean = false,
-                         val response: AccessResponse? = null,
-                         val error: AccessErrorResponse? = null) {
+data class ResponseModel<out T>(val inProgress: Boolean = false,
+                                val success: Boolean = false,
+                                val response: T? = null,
+                                val error: ErrorResponse? = null) {
 
     companion object {
-        fun inProgress() = SubmitUiModel(inProgress = true)
-        fun success(response: AccessResponse) = SubmitUiModel(success = true, response = response)
-        fun failure(error: AccessErrorResponse?) = SubmitUiModel(error = error)
+        fun <T> inProgress() = ResponseModel<T>(inProgress = true)
+        fun <T> success(response: T) = ResponseModel(success = true, response = response)
+        fun <T> failure(error: ErrorResponse?) = ResponseModel<T>(error = error)
     }
 }

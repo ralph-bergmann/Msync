@@ -1,12 +1,18 @@
 package eu.the4thfloor.msync.ui
 
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.preference.ListPreference
 import android.preference.Preference
 import android.preference.PreferenceActivity
 import android.preference.PreferenceManager
+import android.support.annotation.RequiresApi
 import eu.the4thfloor.msync.R
+import eu.the4thfloor.msync.utils.checkSelfPermission
+import org.jetbrains.anko.doFromSdk
 
 class SettingsActivity : PreferenceActivity() {
 
@@ -14,9 +20,19 @@ class SettingsActivity : PreferenceActivity() {
         super.onCreate(savedInstanceState)
         addPreferencesFromResource(R.xml.preferences)
 
-        bindPreferenceSummaryToValue(findPreference("example_text"))
+        bindPreferenceSummaryToValue(findPreference("calendar_name"))
         bindPreferenceSummaryToValue(findPreference("sync_frequency"))
 
+        doFromSdk(Build.VERSION_CODES.M, { checkCalendarPermissions() })
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun checkCalendarPermissions() {
+        if (checkSelfPermission(Manifest.permission.READ_CALENDAR,
+                                Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(Manifest.permission.READ_CALENDAR,
+                                       Manifest.permission.WRITE_CALENDAR), 0)
+        }
     }
 
     /**

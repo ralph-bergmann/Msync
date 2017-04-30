@@ -1,5 +1,9 @@
 package eu.the4thfloor.msync.api.models
 
+import android.accounts.Account
+
+
+open class Response
 
 /**
  * {
@@ -9,7 +13,7 @@ package eu.the4thfloor.msync.api.models
  * ... "refresh_token":"TOKEN_USED_TO_REFRESH_AUTHORIZATION"
  * }
  */
-class AccessResponse {
+class AccessResponse : Response() {
     var access_token: String? = null
     var token_type: String? = null
     var expires_in: Long? = null
@@ -22,15 +26,32 @@ class AccessResponse {
 
 /**
  * {
+ * ... "id": 123,
+ * ... "name": "Bobby Tables"
+ * }
+ */
+class SelfResponse : Response() {
+    var id: Long? = null
+    var name: String? = null
+
+    override fun toString(): String {
+        return "SelfResponse(id=$id, name=$name)"
+    }
+}
+
+class CreateAccountResponse(val account: Account) : Response()
+
+/**
+ * {
  * ... "error_description": "Invalid code",
  * ... "error": "invalid_grant"
  * }
  */
-class AccessErrorResponse {
+class ErrorResponse {
     var error_description: String? = null
     var error: String? = null
 
     override fun toString(): String {
-        return "AccessErrorResponse(error_description=$error_description, error=$error)"
+        return "ErrorResponse(error_description=$error_description, error=$error)"
     }
 }
