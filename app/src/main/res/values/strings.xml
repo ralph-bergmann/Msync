@@ -31,9 +31,14 @@
 
     <string name="pref_title_calendar_sync_now">Sync now</string>
 
-    <string name="pref_key_calendar_name">calendar_name</string>
-    <string name="pref_key_calendar_color">calendar_color</string>
-    <string name="pref_key_sync_frequency">sync_frequency</string>
+    <!-- sync rsvp settings -->
+    <string name="pref_header_sync_rsvp">Sync events by rsvp</string>
+
+    <string name="pref_title_sync_event_yes">Sync rsvp yes</string>
+    <string name="pref_title_sync_event_waitlist">Sync rsvp waitlist</string>
+    <string name="pref_title_sync_event_unanswered">Sync rsvp unanswered</string>
+    <string name="pref_title_sync_event_no">Sync rsvp no</string>
+
 
 
     <!-- share and invite settings -->

@@ -42,6 +42,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.processors.PublishProcessor
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_login.*
+import org.jetbrains.anko.startActivity
 import timber.log.Timber
 import java.lang.ref.WeakReference
 import javax.inject.Inject
@@ -53,7 +54,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
     @Inject lateinit var moshi: Moshi
 
     private val disposables = CompositeDisposable()
-    private val event = PublishProcessor.create<Event>()
+    private val request = PublishProcessor.create<Request>()
 
     private var refreshToken: String? = null
     private var account: Account? = null
@@ -94,7 +95,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
         super.onStart()
 
         val accessTransformer =
-            { flowable: Flowable<Event.Access> ->
+            { flowable: Flowable<Request.Access> ->
                 flowable
                     .flatMap { access ->
                         secureApi.access(mapOf("client_id" to MEETUP_OAUTH_KEY,
@@ -119,7 +120,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
             }
 
         val selfTransformer =
-            { flowable: Flowable<Event.Self> ->
+            { flowable: Flowable<Request.Self> ->
                 flowable
                     .flatMap { self ->
                         meetupApi.self("Bearer ${self.accessToken}")
@@ -140,7 +141,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
             }
 
         val createAccountTransformer =
-            { flowable: Flowable<Event.CreateAccount> ->
+            { flowable: Flowable<Request.CreateAccount> ->
                 flowable
                     .map { createAccount ->
                         val account = createAccount(createAccount.name, createAccount.refreshToken)
@@ -149,19 +150,19 @@ class LoginActivity : AccountAuthenticatorActivity() {
                     .startWith(ResponseModel.inProgress())
             }
 
-        val eventTransformer = FlowableTransformer<Event, ResponseModel<Response>> { flowable ->
+        val requestTransformer = FlowableTransformer<Request, ResponseModel<Response>> { flowable ->
             flowable
                 .publish({ shared ->
                              Flowable.merge(
-                                 shared.ofType(Event.Access::class.java).compose(accessTransformer),
-                                 shared.ofType(Event.Self::class.java).compose(selfTransformer),
-                                 shared.ofType(Event.CreateAccount::class.java).compose(createAccountTransformer))
+                                 shared.ofType(Request.Access::class.java).compose(accessTransformer),
+                                 shared.ofType(Request.Self::class.java).compose(selfTransformer),
+                                 shared.ofType(Request.CreateAccount::class.java).compose(createAccountTransformer))
                          })
         }
 
         disposables
-            .add(event
-                     .compose(eventTransformer)
+            .add(request
+                     .compose(requestTransformer)
                      .subscribe({ (inProgress, success, response, error) ->
                                     progressBar.visibility = if (inProgress) View.VISIBLE else View.GONE
                                     if (!inProgress) {
@@ -229,16 +230,16 @@ class LoginActivity : AccountAuthenticatorActivity() {
     }
 
     private fun loadToken(code: String) {
-        event.onNext(Event.Access(code))
+        request.onNext(Request.Access(code))
     }
 
     private fun handleResponse(response: AccessResponse) {
         refreshToken = response.refresh_token
-        event.onNext(Event.Self(response.access_token!!))
+        request.onNext(Request.Self(response.access_token!!))
     }
 
     private fun handleResponse(response: SelfResponse) {
-        event.onNext(Event.CreateAccount(refreshToken!!, response.name!!))
+        request.onNext(Request.CreateAccount(refreshToken!!, response.name!!))
     }
 
     private fun handleResponse(response: CreateAccountResponse) {
@@ -278,8 +279,14 @@ class LoginActivity : AccountAuthenticatorActivity() {
 
     @RequiresPermission(allOf = arrayOf(Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR))
     private fun createCalendar() {
-        val calendarId = getCalendarID(account!!) ?: createCalendar(account!!)
-        Timber.i("calendarId: $calendarId")
+        if (getCalendarID(account!!) == null) {
+            createCalendar(account!!)
+        }
+        goNext()
+    }
+
+    private fun goNext() {
+        startActivity<SettingsActivity>()
     }
 
     private fun showError() {
@@ -319,10 +326,11 @@ class LoginActivity : AccountAuthenticatorActivity() {
     }
 }
 
-sealed class Event {
-    class Access(val code: String) : Event()
-    class Self(val accessToken: String) : Event()
-    class CreateAccount(val refreshToken: String, val name: String) : Event()
+sealed class Request {
+    class Access(val code: String) : Request()
+    class Self(val accessToken: String) : Request()
+    class CreateAccount(val refreshToken: String, val name: String) : Request()
+    class Calendar(val accessToken: String) : Request()
 }
 
 data class ResponseModel<out T>(val inProgress: Boolean = false,
