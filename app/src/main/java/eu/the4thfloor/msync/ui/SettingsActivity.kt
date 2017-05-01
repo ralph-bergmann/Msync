@@ -20,8 +20,8 @@ class SettingsActivity : PreferenceActivity() {
         super.onCreate(savedInstanceState)
         addPreferencesFromResource(R.xml.preferences)
 
-        bindPreferenceSummaryToValue(findPreference("calendar_name"))
-        bindPreferenceSummaryToValue(findPreference("sync_frequency"))
+        bindPreferenceSummaryToValue(findPreference("pref_key_calendar_name"))
+        bindPreferenceSummaryToValue(findPreference("pref_key_sync_frequency"))
 
         doFromSdk(Build.VERSION_CODES.M, { checkCalendarPermissions() })
     }

@@ -9,14 +9,14 @@
             android:capitalize="words"
             android:defaultValue="@string/pref_default_calendar_name"
             android:inputType="textCapWords"
-            android:key="@string/pref_key_calendar_name"
+            android:key="pref_key_calendar_name"
             android:maxLines="1"
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:title="@string/pref_title_calendar_name"/>
 
         <net.margaritov.preference.colorpicker.ColorPickerPreference
-            android:key="@string/pref_key_calendar_color"
+            android:key="pref_key_calendar_color"
             android:title="@string/pref_title_calendar_color"
             android:defaultValue="@color/red"/>
 
@@ -24,7 +24,7 @@
             android:defaultValue="1440"
             android:entries="@array/pref_sync_frequency_titles"
             android:entryValues="@array/pref_sync_frequency_values"
-            android:key="@string/pref_key_sync_frequency"
+            android:key="pref_key_sync_frequency"
             android:negativeButtonText="@null"
             android:positiveButtonText="@null"
             android:title="@string/pref_title_sync_frequency"/>
@@ -35,6 +35,32 @@
                 android:action="@string/pref_action"
                 android:data="@string/pref_action_sync_now"/>
         </PreferenceScreen>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_header_sync_rsvp"
+        android:key="pref_key_sync_rsvp">
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="pref_key_sync_event_yes"
+            android:title="@string/pref_title_sync_event_yes"/>
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="pref_key_sync_event_waitlist"
+            android:title="@string/pref_title_sync_event_waitlist"/>
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="pref_key_sync_event_unanswered"
+            android:title="@string/pref_title_sync_event_unanswered"/>
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="pref_key_sync_event_no"
+            android:title="@string/pref_title_sync_event_no"/>
 
     </PreferenceCategory>
 

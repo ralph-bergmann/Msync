@@ -35,26 +35,6 @@ android {
         buildConfigField "String", "MEETUP_OAUTH_REDIRECT_URI", "\"${props.meetup_oauth_redirect_uri}\""
         buildConfigField "String", "FIREBASE_DEEPLINK", "\"${props.firebase_deeplink}\""
 
-
-        // preference values
-
-        def actionScheme = "msync"
-        def actionName = cfg.package + ".PREF_ACTION"
-
-        resValue "string", "pref_action", actionName
-        manifestPlaceholders = [actionName: actionName, actionScheme: actionScheme]
-
-        def addConstant = { key, value ->
-            resValue "string", key, "$value"
-            buildConfigField "String", key.toUpperCase(), "\"$value\""
-        }
-
-        addConstant("pref_action_sync_now", actionScheme + "://SYNC_NOW")
-        addConstant("pref_action_share_google_plus", actionScheme + "://SHARE_GOOGLE_PLUS")
-        addConstant("pref_action_share_firebase", actionScheme + "://SHARE_FIREBASE")
-        addConstant("account_type", cfg.package)
-        addConstant("auth_token_type", cfg.package)
-
         playAccountConfig = playAccountConfigs.defaultAccountConfig
     }
 
@@ -85,6 +65,27 @@ android {
             else
                 signingConfig android.signingConfigs.debug
         }
+    }
+
+    buildTypes.all { buildType ->
+
+        def actionScheme = "msync"
+        def actionName = cfg.package + ".PREF_ACTION"
+
+        buildType.resValue "string", "pref_action", actionName
+        buildType.manifestPlaceholders = [actionName: actionName, actionScheme: actionScheme]
+
+        def addConstant = { key, value ->
+            buildType.resValue "string", key, "$value"
+            buildType.buildConfigField "String", key.toUpperCase(), "\"$value\""
+        }
+
+        addConstant("pref_action_sync_now", actionScheme + "://SYNC_NOW")
+        addConstant("pref_action_share_google_plus", actionScheme + "://SHARE_GOOGLE_PLUS")
+        addConstant("pref_action_share_firebase", actionScheme + "://SHARE_FIREBASE")
+
+        addConstant("account_type", cfg.package + buildType.applicationIdSuffix)
+        addConstant("auth_token_type", cfg.package + buildType.applicationIdSuffix)
     }
 
     packagingOptions {
