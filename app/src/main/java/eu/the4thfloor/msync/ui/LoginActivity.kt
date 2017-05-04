@@ -1,3 +1,19 @@
+/*
+ * Copyright 2017 Ralph Bergmann
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package eu.the4thfloor.msync.ui
 
 import android.Manifest
@@ -42,6 +58,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.processors.PublishProcessor
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_login.*
+import org.jetbrains.anko.longToast
 import org.jetbrains.anko.startActivity
 import timber.log.Timber
 import java.lang.ref.WeakReference
@@ -182,8 +199,8 @@ class LoginActivity : AccountAuthenticatorActivity() {
                                             }
                                         } else {
                                             Timber.e("!success %s", error)
-                                            FirebaseCrash.log("failed to execute: $response")
-                                            showError()
+                                            FirebaseCrash.report(Exception("failed to execute: $response"))
+                                            showError("failed to execute: $response")
                                         }
                                     }
                                 },
@@ -191,7 +208,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
                                     Timber.e(error, "failed to access api")
                                     progressBar.visibility = View.GONE
                                     FirebaseCrash.report(error)
-                                    showError()
+                                    showError(error.message)
                                 }))
     }
 
@@ -289,8 +306,10 @@ class LoginActivity : AccountAuthenticatorActivity() {
         finish()
     }
 
-    private fun showError() {
-        // TODO
+    private fun showError(message: String?) {
+        message?.let {
+            longToast(it)
+        }
     }
 
     private class MyWebViewClient(activity: LoginActivity,
