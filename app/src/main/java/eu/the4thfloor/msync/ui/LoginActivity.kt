@@ -160,9 +160,23 @@ class LoginActivity : AccountAuthenticatorActivity() {
         val createAccountTransformer =
             { flowable: Flowable<Request.CreateAccount> ->
                 flowable
-                    .map { createAccount ->
-                        val account = createAccount(createAccount.name, createAccount.refreshToken)
-                        ResponseModel.success(CreateAccountResponse(account))
+                    .flatMap { createAccount ->
+                        createAccount(createAccount.name, createAccount.refreshToken)
+                            .map { account -> ResponseModel.success(CreateAccountResponse(account)) }
+                            .onErrorReturn { t ->
+                                ResponseModel.failure(if (t is HttpException) {
+                                    moshi
+                                        .adapter(ErrorResponse::class.java)
+                                        .fromJson(t.response().errorBody().string())
+                                } else {
+                                    null
+                                })
+                            }
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .startWith(ResponseModel.inProgress())
+
+
                     }
             }
 

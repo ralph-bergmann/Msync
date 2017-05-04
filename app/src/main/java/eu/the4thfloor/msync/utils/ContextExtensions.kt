@@ -23,6 +23,8 @@ import android.os.Build
 import android.support.v4.content.ContextCompat
 import com.google.firebase.crash.FirebaseCrash
 import eu.the4thfloor.msync.BuildConfig
+import io.reactivex.BackpressureStrategy
+import io.reactivex.Flowable
 import org.jetbrains.anko.accountManager
 import eu.the4thfloor.msync.sync.lollipop.createSyncJobs as createSyncJobsLollipop
 import eu.the4thfloor.msync.sync.prelollipop.createSyncJobs as createSyncJobsPreLollipop
@@ -52,24 +54,26 @@ fun Context.getAccount(): Account? =
 fun Context.getRefreshToken(): String =
     accountManager.getPassword(getAccount())
 
-fun Context.createAccount(accountName: String, refreshToken: String): Account {
-    var account: Account? = getAccount()
-    FirebaseCrash.log("createAccount1 account: $account")
+fun Context.createAccount(accountName: String, refreshToken: String): Flowable<Account> =
+    Flowable.create({ e ->
+                        var account: Account? = getAccount()
+                        FirebaseCrash.log("createAccount1 account: $account")
 
-    if (account != null) {
-        return account
-    }
+                        if (account == null) {
 
-    FirebaseCrash.log("createAccount2 try to create new account...")
-    account = Account(accountName, BuildConfig.ACCOUNT_TYPE)
-    FirebaseCrash.log("createAccount3 account: $account")
+                            FirebaseCrash.log("createAccount2 try to create new account...")
+                            account = Account(accountName, BuildConfig.ACCOUNT_TYPE)
+                            FirebaseCrash.log("createAccount3 account: $account")
 
-    accountManager.addAccountExplicitly(account, null, null)
-    accountManager.setPassword(account, refreshToken)
+                            accountManager.addAccountExplicitly(account, null, null)
+                            accountManager.setPassword(account, refreshToken)
 
-    FirebaseCrash.log("createAccount4 new account created")
-    return account
-}
+                            FirebaseCrash.log("createAccount4 new account created")
+                        }
+
+                        e.onNext(account)
+                        e.onComplete()
+                    }, BackpressureStrategy.LATEST)
 
 
 fun Context.createSyncJobs(init: Boolean) =
