@@ -21,7 +21,7 @@ To revoke our permission to access your data at Meetup go to https://www.meetup.
 
 ## Required Permissions
 
-##### We need the following permission:
+#### We need the following permission:
 
 **Access Calendar:** to store, edit, delete your Meetup events on your Android device we need the permission to access your calendar. We create a new calendar for your Meetup events.
 
