@@ -147,7 +147,6 @@ class LoginActivity : AccountAuthenticatorActivity() {
                         val account = createAccount(createAccount.name, createAccount.refreshToken)
                         ResponseModel.success(CreateAccountResponse(account))
                     }
-                    .startWith(ResponseModel.inProgress())
             }
 
         val requestTransformer = FlowableTransformer<Request, ResponseModel<Response>> { flowable ->
@@ -183,7 +182,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
                                             }
                                         } else {
                                             Timber.e("!success %s", error)
-                                            FirebaseCrash.report(Exception(error?.error_description))
+                                            FirebaseCrash.log("failed to execute: $response")
                                             showError()
                                         }
                                     }
@@ -287,6 +286,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
 
     private fun goNext() {
         startActivity<SettingsActivity>()
+        finish()
     }
 
     private fun showError() {
