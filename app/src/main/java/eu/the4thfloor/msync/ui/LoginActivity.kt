@@ -58,6 +58,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.processors.PublishProcessor
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_login.*
+import org.jetbrains.anko.longToast
 import org.jetbrains.anko.startActivity
 import timber.log.Timber
 import java.lang.ref.WeakReference
@@ -198,8 +199,8 @@ class LoginActivity : AccountAuthenticatorActivity() {
                                             }
                                         } else {
                                             Timber.e("!success %s", error)
-                                            FirebaseCrash.log("failed to execute: $response")
-                                            showError()
+                                            FirebaseCrash.report(Exception("failed to execute: $response"))
+                                            showError("failed to execute: $response")
                                         }
                                     }
                                 },
@@ -207,7 +208,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
                                     Timber.e(error, "failed to access api")
                                     progressBar.visibility = View.GONE
                                     FirebaseCrash.report(error)
-                                    showError()
+                                    showError(error.message)
                                 }))
     }
 
@@ -305,8 +306,10 @@ class LoginActivity : AccountAuthenticatorActivity() {
         finish()
     }
 
-    private fun showError() {
-        // TODO
+    private fun showError(message: String?) {
+        message?.let {
+            longToast(it)
+        }
     }
 
     private class MyWebViewClient(activity: LoginActivity,
