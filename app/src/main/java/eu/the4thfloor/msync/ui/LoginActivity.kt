@@ -164,13 +164,9 @@ class LoginActivity : AccountAuthenticatorActivity() {
                         createAccount(createAccount.name, createAccount.refreshToken)
                             .map { account -> ResponseModel.success(CreateAccountResponse(account)) }
                             .onErrorReturn { t ->
-                                ResponseModel.failure(if (t is HttpException) {
-                                    moshi
-                                        .adapter(ErrorResponse::class.java)
-                                        .fromJson(t.response().errorBody().string())
-                                } else {
-                                    null
-                                })
+                                val error = ErrorResponse()
+                                error.error = t.message
+                                ResponseModel.failure(error)
                             }
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
@@ -192,6 +188,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
 
         disposables
             .add(request
+                     .doOnEach { r -> FirebaseCrash.log("request $r") }
                      .compose(requestTransformer)
                      .subscribe({ (inProgress, success, response, error) ->
                                     progressBar.visibility = if (inProgress) View.VISIBLE else View.GONE
@@ -244,9 +241,11 @@ class LoginActivity : AccountAuthenticatorActivity() {
         FirebaseCrash.log("handleUri: $uri")
         Timber.i("uri: %s", uri)
         if (!uri.toString().startsWith(MEETUP_OAUTH_REDIRECT_URI)) {
+            FirebaseCrash.log("handleUri: $uri doesn't match $MEETUP_OAUTH_REDIRECT_URI")
             return false
         }
 
+        FirebaseCrash.log("code: ${uri.getQueryParameter("code")}")
         return uri.getQueryParameter("code")?.let {
             loadToken(it)
             true
