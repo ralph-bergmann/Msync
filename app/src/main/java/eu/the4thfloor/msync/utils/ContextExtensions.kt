@@ -21,6 +21,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.support.v4.content.ContextCompat
+import com.google.firebase.crash.FirebaseCrash
 import eu.the4thfloor.msync.BuildConfig
 import org.jetbrains.anko.accountManager
 import eu.the4thfloor.msync.sync.lollipop.createSyncJobs as createSyncJobsLollipop
@@ -52,17 +53,21 @@ fun Context.getRefreshToken(): String =
     accountManager.getPassword(getAccount())
 
 fun Context.createAccount(accountName: String, refreshToken: String): Account {
-
     var account: Account? = getAccount()
+    FirebaseCrash.log("createAccount1 account: $account")
 
     if (account != null) {
         return account
     }
 
+    FirebaseCrash.log("createAccount2 try to create new account...")
     account = Account(accountName, BuildConfig.ACCOUNT_TYPE)
+    FirebaseCrash.log("createAccount3 account: $account")
+
     accountManager.addAccountExplicitly(account, null, null)
     accountManager.setPassword(account, refreshToken)
 
+    FirebaseCrash.log("createAccount4 new account created")
     return account
 }
 
