@@ -58,7 +58,6 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.processors.PublishProcessor
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_login.*
-import org.jetbrains.anko.longToast
 import org.jetbrains.anko.startActivity
 import timber.log.Timber
 import java.lang.ref.WeakReference
@@ -103,7 +102,6 @@ class LoginActivity : AccountAuthenticatorActivity() {
                 .appendQueryParameter("set_mobile", "on")
                 .build().toString()
 
-            Timber.i("request: %s", url)
             it.loadUrl(url)
         }
     }
@@ -127,7 +125,9 @@ class LoginActivity : AccountAuthenticatorActivity() {
                                         .adapter(ErrorResponse::class.java)
                                         .fromJson(t.response().errorBody().string())
                                 } else {
-                                    null
+                                    ErrorResponse().apply {
+                                        error = t.message
+                                    }
                                 })
                             }
                             .subscribeOn(Schedulers.io())
@@ -148,7 +148,9 @@ class LoginActivity : AccountAuthenticatorActivity() {
                                         .adapter(ErrorResponse::class.java)
                                         .fromJson(t.response().errorBody().string())
                                 } else {
-                                    null
+                                    ErrorResponse().apply {
+                                        error = t.message
+                                    }
                                 })
                             }
                             .subscribeOn(Schedulers.io())
@@ -171,8 +173,6 @@ class LoginActivity : AccountAuthenticatorActivity() {
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .startWith(ResponseModel.inProgress())
-
-
                     }
             }
 
@@ -188,7 +188,6 @@ class LoginActivity : AccountAuthenticatorActivity() {
 
         disposables
             .add(request
-                     .doOnEach { r -> FirebaseCrash.log("request $r") }
                      .compose(requestTransformer)
                      .subscribe({ (inProgress, success, response, error) ->
                                     progressBar.visibility = if (inProgress) View.VISIBLE else View.GONE
@@ -210,7 +209,6 @@ class LoginActivity : AccountAuthenticatorActivity() {
                                             }
                                         } else {
                                             Timber.e("!success %s", error)
-                                            FirebaseCrash.log("subscribe case")
                                             FirebaseCrash.report(Exception("failed to execute: $response"))
                                             showError("failed to execute: $response")
                                         }
@@ -219,7 +217,6 @@ class LoginActivity : AccountAuthenticatorActivity() {
                                 { error ->
                                     Timber.e(error, "failed to access api")
                                     progressBar.visibility = View.GONE
-                                    FirebaseCrash.log("error case")
                                     FirebaseCrash.report(error)
                                     showError(error.message)
                                 }))
@@ -238,14 +235,11 @@ class LoginActivity : AccountAuthenticatorActivity() {
     }
 
     private fun handleUri(uri: Uri): Boolean {
-        FirebaseCrash.log("handleUri: $uri")
         Timber.i("uri: %s", uri)
         if (!uri.toString().startsWith(MEETUP_OAUTH_REDIRECT_URI)) {
-            FirebaseCrash.log("handleUri: $uri doesn't match $MEETUP_OAUTH_REDIRECT_URI")
             return false
         }
 
-        FirebaseCrash.log("code: ${uri.getQueryParameter("code")}")
         return uri.getQueryParameter("code")?.let {
             loadToken(it)
             true
@@ -326,9 +320,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
     }
 
     private fun showError(message: String?) {
-        message?.let {
-            longToast(it)
-        }
+        // TODO
     }
 
     private class MyWebViewClient(activity: LoginActivity,
