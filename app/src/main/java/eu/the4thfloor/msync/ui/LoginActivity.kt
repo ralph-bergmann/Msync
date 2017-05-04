@@ -199,6 +199,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
                                             }
                                         } else {
                                             Timber.e("!success %s", error)
+                                            FirebaseCrash.log("subscribe case")
                                             FirebaseCrash.report(Exception("failed to execute: $response"))
                                             showError("failed to execute: $response")
                                         }
@@ -207,6 +208,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
                                 { error ->
                                     Timber.e(error, "failed to access api")
                                     progressBar.visibility = View.GONE
+                                    FirebaseCrash.log("error case")
                                     FirebaseCrash.report(error)
                                     showError(error.message)
                                 }))
@@ -225,7 +227,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
     }
 
     private fun handleUri(uri: Uri): Boolean {
-
+        FirebaseCrash.log("handleUri: $uri")
         Timber.i("uri: %s", uri)
         if (!uri.toString().startsWith(MEETUP_OAUTH_REDIRECT_URI)) {
             return false
@@ -246,20 +248,24 @@ class LoginActivity : AccountAuthenticatorActivity() {
     }
 
     private fun loadToken(code: String) {
+        FirebaseCrash.log("loadToken: $code")
         request.onNext(Request.Access(code))
     }
 
     private fun handleResponse(response: AccessResponse) {
+        FirebaseCrash.log("handleResponse: AccessResponse")
         refreshToken = response.refresh_token
         request.onNext(Request.Self(response.access_token!!))
     }
 
     private fun handleResponse(response: SelfResponse) {
+        FirebaseCrash.log("handleResponse: SelfResponse")
         request.onNext(Request.CreateAccount(refreshToken!!, response.name!!))
     }
 
     private fun handleResponse(response: CreateAccountResponse) {
         account = response.account
+        FirebaseCrash.log("handleResponse: CreateAccountResponse account: $account")
         doFromSdk(Build.VERSION_CODES.M,
                   {
                       checkCalendarPermissions()
