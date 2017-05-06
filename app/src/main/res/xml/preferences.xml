@@ -2,8 +2,8 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
-        android:title="@string/pref_header_calendar"
-        android:key="pref_key_calendar_settings">
+        android:key="pref_key_calendar_settings"
+        android:title="@string/pref_header_calendar">
 
         <EditTextPreference
             android:capitalize="words"
@@ -16,9 +16,9 @@
             android:title="@string/pref_title_calendar_name"/>
 
         <net.margaritov.preference.colorpicker.ColorPickerPreference
+            android:defaultValue="@color/red"
             android:key="pref_key_calendar_color"
-            android:title="@string/pref_title_calendar_color"
-            android:defaultValue="@color/red"/>
+            android:title="@string/pref_title_calendar_color"/>
 
         <ListPreference
             android:defaultValue="1440"
@@ -39,8 +39,8 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="@string/pref_header_sync_rsvp"
-        android:key="pref_key_sync_rsvp">
+        android:key="pref_key_sync_rsvp"
+        android:title="@string/pref_header_sync_rsvp">
 
         <SwitchPreference
             android:defaultValue="true"
@@ -65,8 +65,8 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="@string/pref_header_share_and_invite"
-        android:key="pref_key_share_settings">
+        android:key="pref_key_share_settings"
+        android:title="@string/pref_header_share_and_invite">
 
         <PreferenceScreen
             android:title="@string/pref_title_share_google_plus">
@@ -81,6 +81,17 @@
                 android:action="@string/pref_action"
                 android:data="@string/pref_action_share_firebase"/>
         </PreferenceScreen>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="pref_key_about"
+        android:title="@string/pref_header_about">
+
+        <Preference
+            android:capitalize="words"
+            android:key="pref_key_version"
+            android:title="@string/pref_title_version_name"/>
 
     </PreferenceCategory>
 

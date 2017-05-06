@@ -15,7 +15,7 @@ buildscript {
         version_code     : 'git rev-list master --first-parent --count'.execute([], project.rootDir).text.trim().toInteger(),
         version_name     : "v1.0.0 alpha10",
         gitSha           : "git rev-parse --short HEAD".execute([], project.rootDir).text.trim(),
-        buildTime        : new Date().format("yyyy-MM-dd' 'HH:mm:ss' 'z"),
+        buildTime        : new Date().format("yyyy-MM-dd"),
         hasKeyfile       : file('./keystore/signing.gradle').exists(),
     ]
 

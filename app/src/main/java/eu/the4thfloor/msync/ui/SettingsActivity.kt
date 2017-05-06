@@ -26,6 +26,9 @@ import android.preference.Preference
 import android.preference.PreferenceActivity
 import android.preference.PreferenceManager
 import android.support.annotation.RequiresApi
+import eu.the4thfloor.msync.BuildConfig.BUILD_DATE
+import eu.the4thfloor.msync.BuildConfig.GIT_SHA
+import eu.the4thfloor.msync.BuildConfig.VERSION_NAME
 import eu.the4thfloor.msync.R
 import eu.the4thfloor.msync.utils.checkSelfPermission
 import org.jetbrains.anko.doFromSdk
@@ -38,6 +41,8 @@ class SettingsActivity : PreferenceActivity() {
 
         bindPreferenceSummaryToValue(findPreference("pref_key_calendar_name"))
         bindPreferenceSummaryToValue(findPreference("pref_key_sync_frequency"))
+
+        findPreference("pref_key_version").summary = "$VERSION_NAME\nBuild Date: $BUILD_DATE\nGit Commit: $GIT_SHA"
 
         doFromSdk(Build.VERSION_CODES.M, { checkCalendarPermissions() })
     }
