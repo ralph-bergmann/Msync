@@ -69,19 +69,19 @@
         android:key="pref_key_share_settings"
         android:title="@string/pref_header_share_and_invite">
 
-        <PreferenceScreen
+        <Preference
             android:title="@string/pref_title_share_google_plus">
             <intent
                 android:action="@string/pref_action"
                 android:data="@string/pref_action_share_google_plus"/>
-        </PreferenceScreen>
+        </Preference>
 
-        <PreferenceScreen
+        <Preference
             android:title="@string/pref_title_share_firebase">
             <intent
                 android:action="@string/pref_action"
                 android:data="@string/pref_action_share_firebase"/>
-        </PreferenceScreen>
+        </Preference>
 
     </PreferenceCategory>
 
