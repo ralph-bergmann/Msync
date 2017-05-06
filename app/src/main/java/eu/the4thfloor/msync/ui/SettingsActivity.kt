@@ -18,6 +18,7 @@ package eu.the4thfloor.msync.ui
 
 
 import android.Manifest
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -31,9 +32,10 @@ import eu.the4thfloor.msync.BuildConfig.GIT_SHA
 import eu.the4thfloor.msync.BuildConfig.VERSION_NAME
 import eu.the4thfloor.msync.R
 import eu.the4thfloor.msync.utils.checkSelfPermission
+import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.doFromSdk
 
-class SettingsActivity : PreferenceActivity() {
+class SettingsActivity : PreferenceActivity(), SharedPreferences.OnSharedPreferenceChangeListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,10 +43,27 @@ class SettingsActivity : PreferenceActivity() {
 
         bindPreferenceSummaryToValue(findPreference("pref_key_calendar_name"))
         bindPreferenceSummaryToValue(findPreference("pref_key_sync_frequency"))
+        bindPreferenceSummaryToValue(findPreference("pref_key_last_sync"))
 
         findPreference("pref_key_version").summary = "$VERSION_NAME\nBuild Date: $BUILD_DATE\nGit Commit: $GIT_SHA"
 
         doFromSdk(Build.VERSION_CODES.M, { checkCalendarPermissions() })
+    }
+
+    override fun onStart() {
+        super.onStart()
+        defaultSharedPreferences.registerOnSharedPreferenceChangeListener(this)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        defaultSharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
+    }
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
+        if (key == "pref_key_last_sync") {
+            findPreference("pref_key_last_sync").summary = sharedPreferences.getString(key, "")
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.M)

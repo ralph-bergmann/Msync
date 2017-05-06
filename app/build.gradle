@@ -118,6 +118,12 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    kotlin {
+        experimental {
+            coroutines 'enable'
+        }
+    }
 }
 
 dependencies {
@@ -133,6 +139,7 @@ dependencies {
 
     // kotlin
     compile "org.jetbrains.kotlin:kotlin-stdlib:${libs.kotlin}"
+    compile "org.jetbrains.kotlinx:kotlinx-coroutines-android:${libs.coroutines}"
 
     // anko
     compile "org.jetbrains.anko:anko-sdk15:${libs.anko}" // sdk19, sdk21, sdk23 are also available

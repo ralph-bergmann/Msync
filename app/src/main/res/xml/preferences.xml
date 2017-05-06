@@ -29,12 +29,13 @@
             android:positiveButtonText="@null"
             android:title="@string/pref_title_sync_frequency"/>
 
-        <PreferenceScreen
-            android:title="@string/pref_title_calendar_sync_now">
+        <Preference
+            android:title="@string/pref_title_calendar_sync_now"
+            android:key="pref_key_last_sync">
             <intent
                 android:action="@string/pref_action"
                 android:data="@string/pref_action_sync_now"/>
-        </PreferenceScreen>
+        </Preference>
 
     </PreferenceCategory>
 
