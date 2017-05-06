@@ -28,6 +28,7 @@ import eu.the4thfloor.msync.api.models.AccessResponse
 import eu.the4thfloor.msync.api.models.CalendarResponse
 import eu.the4thfloor.msync.api.models.ErrorResponse
 import eu.the4thfloor.msync.api.models.Response
+import eu.the4thfloor.msync.api.models.Rsvp
 import eu.the4thfloor.msync.ui.Request
 import eu.the4thfloor.msync.ui.ResponseModel
 import eu.the4thfloor.msync.utils.addEvent
@@ -51,11 +52,32 @@ private val FIELDS = "self,plain_text_description,link"
 private val ONLY = "id,name,time,utc_offset,duration,updated,venue,link,self,plain_text_description"
 
 private fun Context.saveEvents(response: CalendarResponse) {
+
+    val sync_yes = defaultSharedPreferences.getBoolean("pref_key_sync_event_yes", true)
+    val sync_waitlist = defaultSharedPreferences.getBoolean("pref_key_sync_event_waitlist", true)
+    val sync_unanswered = defaultSharedPreferences.getBoolean("pref_key_sync_event_unanswered", false)
+    val sync_no = defaultSharedPreferences.getBoolean("pref_key_sync_event_no", false)
     val ids = mutableListOf<Long>()
+
     response.events
         .forEach { event ->
-            val id = addEvent(event)
-            id?.let { ids.add(it) }
+            when (event.self?.rsvp?.response ?: Rsvp.notanswered) {
+                Rsvp.yes -> {
+                    if (sync_yes) addEvent(event) else null
+                }
+                Rsvp.yes_pending_payment -> {
+                    if (sync_yes) addEvent(event) else null
+                }
+                Rsvp.no -> {
+                    if (sync_no) addEvent(event) else null
+                }
+                Rsvp.waitlist -> {
+                    if (sync_waitlist) addEvent(event) else null
+                }
+                Rsvp.notanswered -> {
+                    if (sync_unanswered) addEvent(event) else null
+                }
+            }?.let { ids.add(it) }
         }
     deleteEventsNotIn(ids)
 }
