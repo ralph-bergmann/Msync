@@ -23,7 +23,6 @@ import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
 import android.provider.CalendarContract.Attendees
-import android.provider.CalendarContract.Attendees.ATTENDEE_STATUS_INVITED
 import android.provider.CalendarContract.CALLER_IS_SYNCADAPTER
 import android.provider.CalendarContract.Calendars
 import android.provider.CalendarContract.Events
@@ -143,7 +142,22 @@ fun Context.addEvent(event: Event): Long? {
     if (cursor.count == 0) {
         cursor.close()
         Timber.v("event %s not found -> insert", event.name)
-        return insertEvent(account, contentValues(calendarId, event, true))
+
+
+        val id = insertEvent(account, contentValues(calendarId, event, true))
+
+        event.self?.rsvp?.response?.let { rsvp ->
+            Timber.v("event %s rsvp changed -> update to %d", event.name, rsvp.value)
+
+            val values = ContentValues()
+            values.put(Attendees.EVENT_ID, id)
+            values.put(Attendees.ATTENDEE_NAME, account.name)
+            values.put(Attendees.ATTENDEE_STATUS, rsvp.value)
+
+            updateSelfAttendeeStatus(account, id, values)
+        }
+
+        return id
     }
 
     cursor.moveToFirst()
@@ -165,6 +179,8 @@ fun Context.addEvent(event: Event): Long? {
             Timber.v("event %s rsvp changed -> update to %d", event.name, rsvp.value)
 
             val values = ContentValues()
+            values.put(Attendees.EVENT_ID, id)
+            values.put(Attendees.ATTENDEE_NAME, account.name)
             values.put(Attendees.ATTENDEE_STATUS, rsvp.value)
 
             updateSelfAttendeeStatus(account, id, values)
@@ -225,12 +241,6 @@ private fun contentValues(calendarId: Long, event: Event, forInsert: Boolean): C
     values.put(Events.GUESTS_CAN_MODIFY, false)
     values.put(Events.GUESTS_CAN_INVITE_OTHERS, false)
     values.put(Events.GUESTS_CAN_SEE_GUESTS, false)
-
-    // SELF_ATTENDEE_STATUS kann nur bei insert, nicht jedoch bei update gesetzt werden
-    if (forInsert) {
-        values.put(Events.SELF_ATTENDEE_STATUS,
-                   event.self?.rsvp?.response?.value ?: ATTENDEE_STATUS_INVITED)
-    }
 
     return values
 }
