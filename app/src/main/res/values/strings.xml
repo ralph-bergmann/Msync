@@ -65,6 +65,8 @@
 
     <string name="syncing_now">Syncing now …</string>
     <string name="last_synced">Last synced %s</string>
+    <string name="please_log_in">Please log in to enable synchronisation.</string>
+    <string name="please_approve_permissions">Please approve needed calendar permissions.</string>
 
 
 </resources>

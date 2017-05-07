@@ -16,7 +16,13 @@
 
 package eu.the4thfloor.msync.sync
 
+import android.Manifest
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import android.support.v4.app.NotificationCompat
 import com.google.firebase.crash.FirebaseCrash
 import com.jakewharton.retrofit2.adapter.rxjava2.HttpException
 import com.squareup.moshi.Moshi
@@ -29,11 +35,15 @@ import eu.the4thfloor.msync.api.models.CalendarResponse
 import eu.the4thfloor.msync.api.models.ErrorResponse
 import eu.the4thfloor.msync.api.models.Response
 import eu.the4thfloor.msync.api.models.Rsvp
+import eu.the4thfloor.msync.ui.CheckLoginStatusActivity
+import eu.the4thfloor.msync.ui.NotificationPermissionsActivity
 import eu.the4thfloor.msync.ui.Request
 import eu.the4thfloor.msync.ui.ResponseModel
 import eu.the4thfloor.msync.utils.addEvent
 import eu.the4thfloor.msync.utils.apply
+import eu.the4thfloor.msync.utils.checkSelfPermission
 import eu.the4thfloor.msync.utils.deleteEventsNotIn
+import eu.the4thfloor.msync.utils.hasAccount
 import io.reactivex.Flowable
 import io.reactivex.FlowableTransformer
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -44,6 +54,8 @@ import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.defaultSharedPreferences
+import org.jetbrains.anko.doFromSdk
+import org.jetbrains.anko.notificationManager
 import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.*
@@ -82,12 +94,65 @@ private fun Context.saveEvents(response: CalendarResponse) {
     deleteEventsNotIn(ids)
 }
 
+private fun Context.showLoginNotification() {
+    notificationManager
+        .notify(0,
+                NotificationCompat.Builder(this)
+                    .apply {
+                        setSmallIcon(R.drawable.ic_notification)
+                        setContentTitle(getString(R.string.app_name))
+                        setContentText(getString(R.string.please_log_in))
+                        setContentIntent(PendingIntent.getActivity(mContext,
+                                                                   0,
+                                                                   Intent(mContext, CheckLoginStatusActivity::class.java)
+                                                                       .apply {
+                                                                           flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                                                       },
+                                                                   PendingIntent.FLAG_UPDATE_CURRENT)
+                                        )
+                        setAutoCancel(true)
+                    }.build())
+}
+
+private fun Context.showPermissionsNotification() {
+    notificationManager
+        .notify(0,
+                NotificationCompat.Builder(this)
+                    .apply {
+                        setSmallIcon(R.drawable.ic_notification)
+                        setContentTitle(getString(R.string.app_name))
+                        setContentText(getString(R.string.please_approve_permissions))
+                        setContentIntent(PendingIntent.getActivity(mContext,
+                                                                   0,
+                                                                   Intent(mContext, NotificationPermissionsActivity::class.java)
+                                                                       .apply {
+                                                                           flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                                                       },
+                                                                   PendingIntent.FLAG_UPDATE_CURRENT)
+                                        )
+                        setAutoCancel(true)
+                    }.build())
+}
+
 fun sync(secureApi: SecureApi,
          meetupApi: MeetupApi,
          refreshToken: String,
          disposables: CompositeDisposable,
          context: Context,
          finish: () -> Unit) {
+
+    if (!context.hasAccount()) {
+        context.showLoginNotification()
+        return
+    }
+
+    doFromSdk(Build.VERSION_CODES.M, {
+        if (context.checkSelfPermission(Manifest.permission.READ_CALENDAR,
+                                        Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+            context.showPermissionsNotification()
+            return
+        }
+    })
 
     context.defaultSharedPreferences.apply("pref_key_last_sync" to context.getString(R.string.syncing_now))
 
