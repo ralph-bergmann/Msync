@@ -85,6 +85,25 @@ fun Context.createCalendar(): Long? {
                                                       values))
 }
 
+fun Context.updateCalendarName() {
+
+    val account = getAccount() ?: return
+    val id = getCalendarID() ?: return
+
+    val calendarName = defaultSharedPreferences.getString("pref_key_calendar_name",
+                                                          getString(R.string.pref_default_calendar_name))
+
+    val values = ContentValues()
+    values.put(Calendars.NAME, calendarName)
+    values.put(Calendars.CALENDAR_DISPLAY_NAME, calendarName)
+
+    val where = "${Calendars._ID} = ?"
+    contentResolver.update(contentUri(Calendars.CONTENT_URI, account),
+                           values,
+                           where,
+                           arrayOf(id.toString()))
+}
+
 fun Context.updateCalendarColor() {
 
     val account = getAccount() ?: return

@@ -26,7 +26,6 @@ import android.preference.ListPreference
 import android.preference.Preference
 import android.preference.PreferenceActivity
 import android.preference.PreferenceManager
-import android.provider.CalendarContract
 import android.support.annotation.RequiresApi
 import eu.the4thfloor.msync.BuildConfig.BUILD_DATE
 import eu.the4thfloor.msync.BuildConfig.GIT_SHA
@@ -35,9 +34,9 @@ import eu.the4thfloor.msync.R
 import eu.the4thfloor.msync.utils.checkSelfPermission
 import eu.the4thfloor.msync.utils.createSyncJobs
 import eu.the4thfloor.msync.utils.updateCalendarColor
+import eu.the4thfloor.msync.utils.updateCalendarName
 import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.doFromSdk
-import timber.log.Timber
 
 class SettingsActivity : PreferenceActivity(), SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -66,13 +65,16 @@ class SettingsActivity : PreferenceActivity(), SharedPreferences.OnSharedPrefere
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
         when (key) {
+            "pref_key_calendar_name" -> {
+                updateCalendarName()
+            }
             "pref_key_sync_frequency" -> {
                 createSyncJobs(false)
             }
             "pref_key_calendar_color" -> {
                 updateCalendarColor()
             }
-            "pref_key_last_sync"      -> {
+            "pref_key_last_sync" -> {
                 findPreference("pref_key_last_sync").summary = sharedPreferences.getString(key, "")
             }
         }
