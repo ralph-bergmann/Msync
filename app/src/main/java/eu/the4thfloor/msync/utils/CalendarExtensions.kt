@@ -217,6 +217,8 @@ private fun contentValues(calendarId: Long,
         values.put(Events.EVENT_LOCATION, mutableListOf<String>().apply {
             venue.name?.let { add(it.trim()) }
             venue.address_1?.let { add(it.trim()) }
+            venue.address_2?.let { add(it.trim()) }
+            venue.address_3?.let { add(it.trim()) }
             venue.city?.let { add(it.trim()) }
             venue.localized_country_name?.let { add(it.trim()) }
         }.joinToString(", "))

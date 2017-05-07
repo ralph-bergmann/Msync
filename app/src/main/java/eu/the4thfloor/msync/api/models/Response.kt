@@ -128,6 +128,8 @@ class EventVenue {
     var id: String? = null
     var name: String? = null
     var address_1: String? = null
+    var address_2: String? = null
+    var address_3: String? = null
     var city: String? = null
     var localized_country_name: String? = null
 
