@@ -269,22 +269,21 @@ class LoginActivity : AccountAuthenticatorActivity() {
     private fun handleResponse(response: CreateAccountResponse) {
         doFromSdk(Build.VERSION_CODES.M,
                   {
-                      checkCalendarPermissions()
+                      if (checkSelfPermission(Manifest.permission.READ_CALENDAR,
+                                              Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+                          requestPermissions(arrayOf(Manifest.permission.READ_CALENDAR,
+                                                     Manifest.permission.WRITE_CALENDAR), 0)
+                      } else {
+                          createCalendarIfNeeded()
+                          createSyncJobs()
+                          goNext()
+                      }
                   },
                   {
                       createCalendarIfNeeded()
                       createSyncJobs()
                       goNext()
                   })
-    }
-
-    @RequiresApi(Build.VERSION_CODES.M)
-    private fun checkCalendarPermissions() {
-        if (checkSelfPermission(Manifest.permission.READ_CALENDAR,
-                                Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(arrayOf(Manifest.permission.READ_CALENDAR,
-                                       Manifest.permission.WRITE_CALENDAR), 0)
-        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
