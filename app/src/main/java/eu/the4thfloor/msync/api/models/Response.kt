@@ -150,7 +150,7 @@ enum class Rsvp(val value: Int) {
     notanswered(ATTENDEE_STATUS_INVITED)
 }
 
-class CreateAccountResponse(val account: Account) : Response()
+class CreateAccountResponse() : Response()
 
 /**
  * {

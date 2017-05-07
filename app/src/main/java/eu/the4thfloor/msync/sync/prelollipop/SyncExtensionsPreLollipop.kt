@@ -23,7 +23,8 @@ import com.firebase.jobdispatcher.FirebaseJobDispatcher
 import com.firebase.jobdispatcher.GooglePlayDriver
 import com.firebase.jobdispatcher.Lifetime
 import com.firebase.jobdispatcher.Trigger
-import java.util.concurrent.TimeUnit.HOURS
+import org.jetbrains.anko.defaultSharedPreferences
+import java.util.concurrent.TimeUnit.MINUTES
 
 
 private val TAG = SyncJobService::class.java.simpleName
@@ -33,7 +34,8 @@ fun Context.createSyncJobs(init: Boolean) {
         if (init) {
             it.createAndScheduleInitJob()
         } else {
-            it.createAndScheduleSyncJob()
+            val syncFrequency = defaultSharedPreferences.getString("pref_key_sync_frequency", "1440").toLong()
+            it.createAndScheduleSyncJob(syncFrequency)
         }
     }
 }
@@ -42,14 +44,15 @@ private fun FirebaseJobDispatcher.createAndScheduleInitJob() {
     schedule(newJobBuilder()
                  .setService(SyncJobService::class.java)
                  .setTag(TAG + "-INIT")
+                 .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
                  .setTrigger(Trigger.executionWindow(0, 0))
                  .setConstraints(Constraint.ON_ANY_NETWORK)
                  .build())
 }
 
-private fun FirebaseJobDispatcher.createAndScheduleSyncJob() {
-    val periodicity = HOURS.toSeconds(2).toInt()
-    val toleranceInterval = HOURS.toSeconds(1).toInt()
+private fun FirebaseJobDispatcher.createAndScheduleSyncJob(syncFrequency: Long) {
+    val periodicity = MINUTES.toSeconds(syncFrequency).toInt()
+    val toleranceInterval = MINUTES.toSeconds(syncFrequency / 2).toInt()
     schedule(newJobBuilder()
                  .setService(SyncJobService::class.java)
                  .setTag(TAG + "-SYNC")
@@ -58,5 +61,6 @@ private fun FirebaseJobDispatcher.createAndScheduleSyncJob() {
                                                      periodicity + toleranceInterval))
                  .setRecurring(true)
                  .setConstraints(Constraint.ON_ANY_NETWORK)
+                 .setReplaceCurrent(true)
                  .build())
 }

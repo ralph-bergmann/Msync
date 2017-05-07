@@ -30,6 +30,8 @@ android {
         props.load(new FileInputStream('./keystore/meetup.properties'))
 
         resConfig "en"
+        buildConfigField "String", "BUILD_DATE", "\"${cfg.buildTime}\""
+        buildConfigField "String", "GIT_SHA", "\"${cfg.gitSha}\""
         buildConfigField "String", "MEETUP_OAUTH_KEY", "\"${props.meetup_oauth_key}\""
         buildConfigField "String", "MEETUP_OAUTH_SECRET", "\"${props.meetup_oauth_secret}\""
         buildConfigField "String", "MEETUP_OAUTH_REDIRECT_URI", "\"${props.meetup_oauth_redirect_uri}\""
@@ -116,6 +118,18 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    kotlin {
+        experimental {
+            coroutines 'enable'
+        }
+    }
+}
+
+play {
+    track = 'rollout' // or 'production' or 'beta' or 'alpha'
+    userFraction = 0.2 // only necessary for 'rollout', in this case default is 0.1 (10% of the target)
+    untrackOld = true // will untrack 'alpha' while upload to 'beta'
 }
 
 dependencies {
@@ -131,6 +145,7 @@ dependencies {
 
     // kotlin
     compile "org.jetbrains.kotlin:kotlin-stdlib:${libs.kotlin}"
+    compile "org.jetbrains.kotlinx:kotlinx-coroutines-android:${libs.coroutines}"
 
     // anko
     compile "org.jetbrains.anko:anko-sdk15:${libs.anko}" // sdk19, sdk21, sdk23 are also available

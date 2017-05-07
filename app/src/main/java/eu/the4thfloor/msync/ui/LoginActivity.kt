@@ -17,7 +17,6 @@
 package eu.the4thfloor.msync.ui
 
 import android.Manifest
-import android.accounts.Account
 import android.accounts.AccountAuthenticatorActivity
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -49,6 +48,7 @@ import eu.the4thfloor.msync.api.models.SelfResponse
 import eu.the4thfloor.msync.utils.checkSelfPermission
 import eu.the4thfloor.msync.utils.createAccount
 import eu.the4thfloor.msync.utils.createCalendar
+import eu.the4thfloor.msync.utils.createSyncJobs
 import eu.the4thfloor.msync.utils.doFromSdk
 import eu.the4thfloor.msync.utils.getCalendarID
 import io.reactivex.Flowable
@@ -73,7 +73,6 @@ class LoginActivity : AccountAuthenticatorActivity() {
     private val request = PublishProcessor.create<Request>()
 
     private var refreshToken: String? = null
-    private var account: Account? = null
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -164,7 +163,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
                 flowable
                     .flatMap { createAccount ->
                         createAccount(createAccount.name, createAccount.refreshToken)
-                            .map { account -> ResponseModel.success(CreateAccountResponse(account)) }
+                            .map { _ -> ResponseModel.success(CreateAccountResponse()) }
                             .onErrorReturn { t ->
                                 val error = ErrorResponse()
                                 error.error = t.message
@@ -255,30 +254,27 @@ class LoginActivity : AccountAuthenticatorActivity() {
     }
 
     private fun loadToken(code: String) {
-        FirebaseCrash.log("loadToken: $code")
         request.onNext(Request.Access(code))
     }
 
     private fun handleResponse(response: AccessResponse) {
-        FirebaseCrash.log("handleResponse: AccessResponse")
         refreshToken = response.refresh_token
         request.onNext(Request.Self(response.access_token!!))
     }
 
     private fun handleResponse(response: SelfResponse) {
-        FirebaseCrash.log("handleResponse: SelfResponse")
         request.onNext(Request.CreateAccount(refreshToken!!, response.name!!))
     }
 
     private fun handleResponse(response: CreateAccountResponse) {
-        account = response.account
-        FirebaseCrash.log("handleResponse: CreateAccountResponse account: $account")
         doFromSdk(Build.VERSION_CODES.M,
                   {
                       checkCalendarPermissions()
                   },
                   {
-                      createCalendar()
+                      createCalendarIfNeeded()
+                      createSyncJobs()
+                      goNext()
                   })
     }
 
@@ -300,18 +296,23 @@ class LoginActivity : AccountAuthenticatorActivity() {
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED
                     && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
 
-                    createCalendar()
+                    createCalendarIfNeeded()
+                    createSyncJobs()
+                    goNext()
                 }
             }
         }
     }
 
     @RequiresPermission(allOf = arrayOf(Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR))
-    private fun createCalendar() {
-        if (getCalendarID(account!!) == null) {
-            createCalendar(account!!)
+    private fun createCalendarIfNeeded() {
+        if (getCalendarID() == null) {
+            createCalendar()
         }
-        goNext()
+    }
+
+    private fun createSyncJobs() {
+        createSyncJobs(false)
     }
 
     private fun goNext() {

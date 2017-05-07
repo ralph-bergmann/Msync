@@ -23,8 +23,9 @@ import android.content.ComponentName
 import android.content.Context
 import android.os.Build
 import android.support.annotation.RequiresApi
+import org.jetbrains.anko.defaultSharedPreferences
 import timber.log.Timber
-import java.util.concurrent.TimeUnit.HOURS
+import java.util.concurrent.TimeUnit
 
 private val JOB_ID_INIT = 1
 private val JOB_ID_SYNC = 2
@@ -36,7 +37,8 @@ fun Context.createSyncJobs(init: Boolean) {
             if (init) {
                 scheduler.createAndScheduleInitJob(component)
             } else {
-                scheduler.createAndScheduleSyncJob(component)
+                val syncFrequency = defaultSharedPreferences.getString("pref_key_sync_frequency", "1440").toLong()
+                scheduler.createAndScheduleSyncJob(component, syncFrequency)
             }
         }
     }
@@ -52,9 +54,9 @@ private fun JobScheduler.createAndScheduleInitJob(componentName: ComponentName) 
 }
 
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-private fun JobScheduler.createAndScheduleSyncJob(componentName: ComponentName) {
+private fun JobScheduler.createAndScheduleSyncJob(componentName: ComponentName, syncFrequency: Long) {
     Timber.i("createAndScheduleSyncJob")
-    val periodicity = HOURS.toMillis(2)
+    val periodicity = TimeUnit.MINUTES.toMillis(syncFrequency)
     schedule(JobInfo.Builder(JOB_ID_SYNC, componentName)
                  .setPersisted(true)
                  .setPeriodic(periodicity)

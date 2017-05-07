@@ -57,4 +57,14 @@
     <string name="firebase_app_invite_email_subject">Try out Msync for Android.</string>
     <string name="firebase_app_invite_email_html"><![CDATA[<a target="_top" href="%%APPINVITE_LINK_PLACEHOLDER%%,">Install Msync for Android.</a>]]></string>
 
+
+    <!-- about -->
+    <string name="pref_header_about">About</string>
+    <string name="pref_title_version_name">Version</string>
+
+
+    <string name="syncing_now">Syncing now …</string>
+    <string name="last_synced">Last synced %s</string>
+
+
 </resources>
