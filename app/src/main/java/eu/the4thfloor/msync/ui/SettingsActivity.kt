@@ -33,6 +33,7 @@ import eu.the4thfloor.msync.BuildConfig.GIT_SHA
 import eu.the4thfloor.msync.BuildConfig.VERSION_NAME
 import eu.the4thfloor.msync.R
 import eu.the4thfloor.msync.utils.checkSelfPermission
+import eu.the4thfloor.msync.utils.createSyncJobs
 import eu.the4thfloor.msync.utils.updateCalendarColor
 import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.doFromSdk
@@ -66,6 +67,7 @@ class SettingsActivity : PreferenceActivity(), SharedPreferences.OnSharedPrefere
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
         when (key) {
             "pref_key_sync_frequency" -> {
+                createSyncJobs(false)
             }
             "pref_key_calendar_color" -> {
                 updateCalendarColor()
