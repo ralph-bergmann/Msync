@@ -28,6 +28,10 @@
             android:name=".ui.CheckLoginStatusActivity"
             android:theme="@android:style/Theme.NoDisplay"/>
 
+        <activity
+            android:name=".ui.NotificationPermissionsActivity"
+            android:theme="@style/AppTheme.NoUI"/>
+
         <activity android:name=".ui.LoginActivity"/>
 
         <activity
