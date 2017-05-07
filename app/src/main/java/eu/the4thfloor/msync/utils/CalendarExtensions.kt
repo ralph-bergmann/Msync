@@ -115,7 +115,8 @@ fun Context.addEvent(event: Event): Long? {
     val cursor = contentResolver.query(contentUri(Events.CONTENT_URI, account),
                                        arrayOf(Events._ID,
                                                Events.SELF_ATTENDEE_STATUS,
-                                               Events.SYNC_DATA1),
+                                               Events.SYNC_DATA1,
+                                               Events.DELETED),
                                        "${Events.CALENDAR_ID} = ? AND ${Events._SYNC_ID} = ?",
                                        arrayOf(calendarId.toString(), event.id),
                                        null)
@@ -128,12 +129,13 @@ fun Context.addEvent(event: Event): Long? {
 
     cursor.moveToFirst()
     val id = cursor.getLong(cursor.getColumnIndex(Events._ID))
-    val updated_time = cursor.getLong(cursor.getColumnIndex(Events.SYNC_DATA1))
     val rsvp_status = cursor.getInt(cursor.getColumnIndex(Events.SELF_ATTENDEE_STATUS))
+    val updated_time = cursor.getLong(cursor.getColumnIndex(Events.SYNC_DATA1))
+    val deleted = cursor.getInt(cursor.getColumnIndex(Events.DELETED))
     cursor.close()
 
 
-    if (updated_time != event.updated) {
+    if (updated_time != event.updated || deleted == 1) {
         Timber.v("event %s changed -> update", event.name)
         updateEvent(account, id, contentValues(calendarId, event, false))
     }
@@ -168,6 +170,7 @@ private fun contentValues(calendarId: Long, event: Event, forInsert: Boolean): C
     values.put(Events._SYNC_ID, event.id)
     values.put(Events.CALENDAR_ID, calendarId)
     values.put(Events.SYNC_DATA1, event.updated)
+    values.put(Events.DELETED, 0)
 
     values.put(Events.DTSTART, event.time!!)
     values.put(Events.DTEND, event.time!! + (event.duration ?: HOURS.toMillis(3)))
