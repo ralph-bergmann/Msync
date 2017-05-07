@@ -142,22 +142,7 @@ fun Context.addEvent(event: Event): Long? {
     if (cursor.count == 0) {
         cursor.close()
         Timber.v("event %s not found -> insert", event.name)
-
-
-        val id = insertEvent(account, contentValues(calendarId, event, true))
-
-        event.self?.rsvp?.response?.let { rsvp ->
-            Timber.v("event %s rsvp changed -> update to %d", event.name, rsvp.value)
-
-            val values = ContentValues()
-            values.put(Attendees.EVENT_ID, id)
-            values.put(Attendees.ATTENDEE_NAME, account.name)
-            values.put(Attendees.ATTENDEE_STATUS, rsvp.value)
-
-            updateSelfAttendeeStatus(account, id, values)
-        }
-
-        return id
+        return insertEvent(account, contentValues(calendarId, event, true))
     }
 
     cursor.moveToFirst()
@@ -170,19 +155,18 @@ fun Context.addEvent(event: Event): Long? {
 
     if (updated_time != event.updated || deleted == 1) {
         Timber.v("event %s changed -> update", event.name)
-        updateEvent(account, id, contentValues(calendarId, event, false))
+        updateEvent(account, id, contentValues(calendarId, event))
     }
 
 
     event.self?.rsvp?.response?.let { rsvp ->
         if (rsvp_status != rsvp.value) {
-            Timber.v("event %s rsvp changed -> update to %d", event.name, rsvp.value)
-
+            Timber.v("event %s rsvp changed -> update from %d to %d",
+                     event.name,
+                     rsvp_status,
+                     rsvp.value)
             val values = ContentValues()
-            values.put(Attendees.EVENT_ID, id)
-            values.put(Attendees.ATTENDEE_NAME, account.name)
             values.put(Attendees.ATTENDEE_STATUS, rsvp.value)
-
             updateSelfAttendeeStatus(account, id, values)
         }
     }
@@ -198,7 +182,9 @@ fun Context.deleteEventsNotIn(ids: List<Long>) {
     contentResolver.delete(contentUri(Events.CONTENT_URI, account), where, null)
 }
 
-private fun contentValues(calendarId: Long, event: Event, forInsert: Boolean): ContentValues {
+private fun contentValues(calendarId: Long,
+                          event: Event,
+                          forInsert: Boolean = false): ContentValues {
 
     val values = ContentValues()
 
@@ -236,6 +222,16 @@ private fun contentValues(calendarId: Long, event: Event, forInsert: Boolean): C
         }.joinToString(", "))
     }
 
+    event.group?.let { group ->
+        values.put(Events.ORGANIZER, group.name)
+    }
+
+    // SELF_ATTENDEE_STATUS kann nur bei insert, nicht jedoch bei update gesetzt werden
+    if (forInsert) {
+        event.self?.rsvp?.response?.let { rsvp ->
+            values.put(Events.SELF_ATTENDEE_STATUS, rsvp.value)
+        }
+    }
 
     values.put(Events.HAS_ATTENDEE_DATA, true)
     values.put(Events.GUESTS_CAN_MODIFY, false)

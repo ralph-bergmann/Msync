@@ -16,7 +16,6 @@
 
 package eu.the4thfloor.msync.api.models
 
-import android.accounts.Account
 import android.provider.CalendarContract.Attendees.ATTENDEE_STATUS_ACCEPTED
 import android.provider.CalendarContract.Attendees.ATTENDEE_STATUS_DECLINED
 import android.provider.CalendarContract.Attendees.ATTENDEE_STATUS_INVITED
@@ -88,6 +87,16 @@ class CalendarResponse(val events: List<Event>) : Response()
  * ......... "country": "de",
  * ......... "localized_country_name": "Germany"
  * ...... },
+ * ...... "group": {
+ * ......... "created": 1461339963000,
+ * ......... "name": "Berlin Outdoor Events",
+ * ......... "id": 19870711,
+ * ......... "join_mode": "open",
+ * ......... "lat": 52.52000045776367,
+ * ......... "lon": 13.380000114440918,
+ * ......... "urlname": "Berlin-Outdoor-Events",
+ * ......... "who": "Members"
+ * ...... },
  * ...... "updated": 1492617561000,
  * ...... "duration": 10800000,
  * ...... "time": 1493830800000,
@@ -107,6 +116,7 @@ class Event {
     var duration: Long? = null
     var updated: Long? = null
     var venue: EventVenue? = null
+    var group: EventGroup? = null
     var self: EventSelf? = null
 
     override fun toString(): String {
@@ -123,6 +133,15 @@ class EventVenue {
 
     override fun toString(): String {
         return "EventVenue(id=$id, name=$name)"
+    }
+}
+
+class EventGroup {
+    var id: String? = null
+    var name: String? = null
+
+    override fun toString(): String {
+        return "EventGroup(id=$id, name=$name)"
     }
 }
 

@@ -49,7 +49,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 private val FIELDS = "self,plain_text_description,link"
-private val ONLY = "id,name,time,utc_offset,duration,updated,venue,link,self,plain_text_description"
+private val ONLY = "id,name,time,utc_offset,duration,updated,venue,group,link,self,plain_text_description"
 
 private fun Context.saveEvents(response: CalendarResponse) {
 
