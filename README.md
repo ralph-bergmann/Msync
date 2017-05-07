@@ -2,11 +2,11 @@ Welcome to Msync!
 ===================
 
 With Msync you can sync your Meetup events into your Android calendar. Not more.
-This is the open and free source of the Msync.
 
-If you just want to run the app download it from [Google Play](https://play.google.com/store/apps/details?id=eu.the4thfloor.msync)
-If you have wishes, comments or you found a bug please report them [here](https://github.com/the4thfloor/Msync/issues).
-
+ - If you just want to run the app download it from [Google
+   Play](https://play.google.com/store/apps/details?id=eu.the4thfloor.msync)
+ - If you have wishes, comments or you found a bug please report them
+   [here](https://github.com/the4thfloor/Msync/issues).
 
 [![CLA assistant](https://cla-assistant.io/readme/badge/the4thfloor/msync)](https://cla-assistant.io/the4thfloor/msync)
 
