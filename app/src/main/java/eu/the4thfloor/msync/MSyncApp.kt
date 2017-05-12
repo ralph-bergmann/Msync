@@ -18,7 +18,6 @@ package eu.the4thfloor.msync
 
 import android.app.Application
 import android.os.StrictMode
-import com.jakewharton.threetenabp.AndroidThreeTen
 import com.squareup.leakcanary.LeakCanary
 import com.squareup.leakcanary.RefWatcher
 import eu.the4thfloor.msync.di.MainComponent
@@ -61,7 +60,6 @@ class MSyncApp : Application() {
 
             enableStetho()
         }
-        AndroidThreeTen.init(this)
     }
 
     companion object {

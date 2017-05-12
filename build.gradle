@@ -36,7 +36,6 @@ buildscript {
         rxandroid               : "2.0.1",
         rxjava                  : "2.1.0",
         stetho                  : "1.5.0",
-        threetenabp             : "1.0.5",
         timber                  : "4.5.1",
     ]
 

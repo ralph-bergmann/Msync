@@ -153,9 +153,6 @@ dependencies {
     // timber
     compile "com.jakewharton.timber:timber:${libs.timber}"
 
-    // threetenabp
-    compile "com.jakewharton.threetenabp:threetenabp:${libs.threetenabp}"
-
     // stetho
     debugCompile "com.facebook.stetho:stetho:${libs.stetho}"
     debugCompile "com.facebook.stetho:stetho-okhttp3:${libs.stetho}"
