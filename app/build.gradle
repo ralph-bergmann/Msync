@@ -30,12 +30,12 @@ android {
         props.load(new FileInputStream('./keystore/meetup.properties'))
 
         resConfig "en"
+        buildConfigField "String", "PLAYSTORE_LINK", "\"${props.playstore_link}\""
         buildConfigField "String", "BUILD_DATE", "\"${cfg.buildTime}\""
         buildConfigField "String", "GIT_SHA", "\"${cfg.gitSha}\""
         buildConfigField "String", "MEETUP_OAUTH_KEY", "\"${props.meetup_oauth_key}\""
         buildConfigField "String", "MEETUP_OAUTH_SECRET", "\"${props.meetup_oauth_secret}\""
         buildConfigField "String", "MEETUP_OAUTH_REDIRECT_URI", "\"${props.meetup_oauth_redirect_uri}\""
-        buildConfigField "String", "FIREBASE_DEEPLINK", "\"${props.firebase_deeplink}\""
 
         playAccountConfig = playAccountConfigs.defaultAccountConfig
     }
@@ -83,8 +83,7 @@ android {
         }
 
         addConstant("pref_action_sync_now", actionScheme + "://SYNC_NOW")
-        addConstant("pref_action_share_google_plus", actionScheme + "://SHARE_GOOGLE_PLUS")
-        addConstant("pref_action_share_firebase", actionScheme + "://SHARE_FIREBASE")
+        addConstant("pref_action_share", actionScheme + "://SHARE")
 
         addConstant("account_type", cfg.package + buildType.applicationIdSuffix)
         addConstant("auth_token_type", cfg.package + buildType.applicationIdSuffix)
@@ -136,12 +135,8 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
 
     // firebase
-    compile "com.google.firebase:firebase-invites:${libs.firebase}"
     compile "com.google.firebase:firebase-crash:${libs.firebase}"
     compile "com.firebase:firebase-jobdispatcher:${libs.firebase_jobdispatcher}"
-
-    // google
-    compile "com.google.android.gms:play-services-plus:${libs.play_services}"
 
     // kotlin
     compile "org.jetbrains.kotlin:kotlin-stdlib:${libs.kotlin}"

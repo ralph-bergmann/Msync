@@ -41,21 +41,10 @@
 
 
 
-    <!-- share and invite settings -->
-    <string name="pref_header_share_and_invite">Share and Invite</string>
+    <!-- share settings -->
+    <string name="pref_header_share">Share</string>
+    <string name="pref_title_share">Share</string>
 
-    <string name="pref_title_share_google_plus">Share on G+</string>
-    <string name="pref_title_share_firebase">Invite friends</string>
-
-
-    <!-- g+ share -->
-    <string name="google_plus_share_message">Try out Msync for Android. Sync your Meetup events into your Android calendar.</string>
-
-    <!-- firebase app invites -->
-    <string name="firebase_app_invite_title">Share with Firebase</string>
-    <string name="firebase_app_invite_message">Try out Msync for Android. Sync your Meetup events into your Android calendar.</string>
-    <string name="firebase_app_invite_email_subject">Try out Msync for Android.</string>
-    <string name="firebase_app_invite_email_html"><![CDATA[<a target="_top" href="%%APPINVITE_LINK_PLACEHOLDER%%,">Install Msync for Android.</a>]]></string>
 
 
     <!-- about -->
