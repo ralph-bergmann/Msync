@@ -13,7 +13,7 @@ buildscript {
         targetSdk        : 25,
         compileVersion   : 25,
         version_code     : 'git rev-list master --first-parent --count'.execute([], project.rootDir).text.trim().toInteger(),
-        version_name     : "v1.0.1",
+        version_name     : "v1.0.2",
         gitSha           : "git rev-parse --short HEAD".execute([], project.rootDir).text.trim(),
         buildTime        : new Date().format("yyyy-MM-dd"),
         hasKeyfile       : file('./keystore/signing.gradle').exists(),
@@ -30,13 +30,11 @@ buildscript {
         kotlin                  : "1.1.2-3",
         leakcanary              : "1.5.1",
         okhttp_logging          : "3.7.0",
-        play_services           : "10.2.4",
         retrofit                : "2.2.0",
         retrofit_rxjava2_adapter: "1.0.0",
         rxandroid               : "2.0.1",
         rxjava                  : "2.1.0",
         stetho                  : "1.5.0",
-        threetenabp             : "1.0.5",
         timber                  : "4.5.1",
     ]
 

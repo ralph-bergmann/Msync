@@ -67,21 +67,15 @@
 
     <PreferenceCategory
         android:key="pref_key_share_settings"
-        android:title="@string/pref_header_share_and_invite">
+        android:title="@string/pref_header_share">
 
         <Preference
-            android:title="@string/pref_title_share_google_plus">
+            android:title="@string/pref_title_share">
             <intent
                 android:action="@string/pref_action"
-                android:data="@string/pref_action_share_google_plus"/>
+                android:data="@string/pref_action_share"/>
         </Preference>
 
-        <Preference
-            android:title="@string/pref_title_share_firebase">
-            <intent
-                android:action="@string/pref_action"
-                android:data="@string/pref_action_share_firebase"/>
-        </Preference>
 
     </PreferenceCategory>
 

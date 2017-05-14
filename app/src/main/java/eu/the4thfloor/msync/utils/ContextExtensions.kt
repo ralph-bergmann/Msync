@@ -21,7 +21,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.support.v4.content.ContextCompat
-import com.google.firebase.crash.FirebaseCrash
 import eu.the4thfloor.msync.BuildConfig
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
@@ -57,18 +56,11 @@ fun Context.getRefreshToken(): String =
 fun Context.createAccount(accountName: String, refreshToken: String): Flowable<Account> =
     Flowable.create({ e ->
                         var account: Account? = getAccount()
-                        FirebaseCrash.log("createAccount1 account: $account")
 
                         if (account == null) {
-
-                            FirebaseCrash.log("createAccount2 try to create new account...")
                             account = Account(accountName, BuildConfig.ACCOUNT_TYPE)
-                            FirebaseCrash.log("createAccount3 account: $account")
-
                             accountManager.addAccountExplicitly(account, null, null)
                             accountManager.setPassword(account, refreshToken)
-
-                            FirebaseCrash.log("createAccount4 new account created")
                         }
 
                         e.onNext(account)
