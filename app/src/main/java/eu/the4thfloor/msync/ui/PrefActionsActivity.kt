@@ -42,12 +42,12 @@ class PrefActionsActivity : Activity() {
                 createSyncJobs(true)
             } else if (PREF_ACTION_SHARE.equals(it, ignoreCase = true)) {
                 fa.logEvent("share", null)
-                startActivity(
-                    Intent()
-                        .apply {
-                            setType("text/plain")
-                            putExtra(Intent.EXTRA_TEXT, BuildConfig.PLAYSTORE_LINK)
-                        })
+                startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND)
+                                                       .apply {
+                                                           type = "text/plain"
+                                                           putExtra(Intent.EXTRA_TEXT, BuildConfig.PLAYSTORE_LINK)
+                                                       },
+                                                   null))
             }
         }
 
