@@ -19,14 +19,18 @@ package eu.the4thfloor.msync.ui
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import com.google.firebase.analytics.FirebaseAnalytics
 import eu.the4thfloor.msync.BuildConfig
 import eu.the4thfloor.msync.BuildConfig.PREF_ACTION_SHARE
 import eu.the4thfloor.msync.BuildConfig.PREF_ACTION_SYNC_NOW
 import eu.the4thfloor.msync.MSyncApp
 import eu.the4thfloor.msync.utils.createSyncJobs
+import javax.inject.Inject
 
 
 class PrefActionsActivity : Activity() {
+
+    @Inject lateinit var fa: FirebaseAnalytics
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,6 +41,7 @@ class PrefActionsActivity : Activity() {
             if (PREF_ACTION_SYNC_NOW.equals(it, ignoreCase = true)) {
                 createSyncJobs(true)
             } else if (PREF_ACTION_SHARE.equals(it, ignoreCase = true)) {
+                fa.logEvent("share", null)
                 startActivity(
                     Intent()
                         .apply {
