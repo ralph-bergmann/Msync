@@ -27,21 +27,30 @@ import android.preference.Preference
 import android.preference.PreferenceActivity
 import android.preference.PreferenceManager
 import android.support.annotation.RequiresApi
+import com.google.firebase.analytics.FirebaseAnalytics
 import eu.the4thfloor.msync.BuildConfig.BUILD_DATE
 import eu.the4thfloor.msync.BuildConfig.GIT_SHA
 import eu.the4thfloor.msync.BuildConfig.VERSION_NAME
+import eu.the4thfloor.msync.MSyncApp
 import eu.the4thfloor.msync.R
+import eu.the4thfloor.msync.utils.FA_PROPERTY_SYNC_INTERVAL
 import eu.the4thfloor.msync.utils.checkSelfPermission
 import eu.the4thfloor.msync.utils.createSyncJobs
 import eu.the4thfloor.msync.utils.updateCalendarColor
 import eu.the4thfloor.msync.utils.updateCalendarName
 import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.doFromSdk
+import javax.inject.Inject
 
 class SettingsActivity : PreferenceActivity(), SharedPreferences.OnSharedPreferenceChangeListener {
 
+    @Inject lateinit var fa: FirebaseAnalytics
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        MSyncApp.graph.inject(this)
+
         addPreferencesFromResource(R.xml.preferences)
 
         bindPreferenceSummaryToValue(findPreference("pref_key_calendar_name"))
@@ -69,6 +78,8 @@ class SettingsActivity : PreferenceActivity(), SharedPreferences.OnSharedPrefere
                 updateCalendarName()
             }
             "pref_key_sync_frequency" -> {
+                val syncFrequency = defaultSharedPreferences.getString("pref_key_sync_frequency", "1440")
+                fa.setUserProperty(FA_PROPERTY_SYNC_INTERVAL, syncFrequency)
                 createSyncJobs(false)
             }
             "pref_key_calendar_color" -> {

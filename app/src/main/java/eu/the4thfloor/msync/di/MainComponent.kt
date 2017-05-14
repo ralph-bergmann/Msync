@@ -19,6 +19,7 @@ package eu.the4thfloor.msync.di
 import dagger.Component
 import eu.the4thfloor.msync.ui.LoginActivity
 import eu.the4thfloor.msync.ui.PrefActionsActivity
+import eu.the4thfloor.msync.ui.SettingsActivity
 import javax.inject.Singleton
 import eu.the4thfloor.msync.sync.lollipop.SyncJobService as SyncJobServiceLollipop
 import eu.the4thfloor.msync.sync.prelollipop.SyncJobService as SyncJobServicePreLollipop
@@ -28,6 +29,7 @@ import eu.the4thfloor.msync.sync.prelollipop.SyncJobService as SyncJobServicePre
 interface MainComponent {
 
     fun inject(loginActivity: LoginActivity)
+    fun inject(settingsActivity: SettingsActivity)
     fun inject(prefActionsActivity: PrefActionsActivity)
     fun inject(syncJobService: SyncJobServiceLollipop)
     fun inject(syncJobService: SyncJobServicePreLollipop)
