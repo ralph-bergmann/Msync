@@ -8,6 +8,10 @@ apply plugin: 'kotlin-kapt'
 def cfg = rootProject.ext.configuration
 def libs = rootProject.ext.libs
 
+if (cfg.hasKeyfile) {
+    apply from: '../keystore/signing.gradle'
+}
+
 android {
     compileSdkVersion cfg.compileVersion
     buildToolsVersion cfg.buildToolsVersion

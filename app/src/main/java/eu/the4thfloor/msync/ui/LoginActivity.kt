@@ -70,7 +70,6 @@ class LoginActivity : AccountAuthenticatorActivity() {
 
     @Inject lateinit var secureApi: SecureApi
     @Inject lateinit var meetupApi: MeetupApi
-    @Inject lateinit var moshi: Moshi
     @Inject lateinit var fa: FirebaseAnalytics
 
     private val disposables = CompositeDisposable()
@@ -112,6 +111,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
     override fun onStart() {
         super.onStart()
 
+        val moshi = Moshi.Builder().build().adapter(ErrorResponse::class.java)
         val accessTransformer =
             { flowable: Flowable<Request.Access> ->
                 flowable
@@ -124,14 +124,16 @@ class LoginActivity : AccountAuthenticatorActivity() {
                             .map { response -> ResponseModel.success(response) }
                             .onErrorReturn { t ->
                                 ResponseModel.failure(if (t is HttpException) {
-                                    moshi
-                                        .adapter(ErrorResponse::class.java)
-                                        .fromJson(t.response().errorBody().string())
-                                } else {
-                                    ErrorResponse().apply {
-                                        error = t.message
-                                    }
-                                })
+                                                          t.response().errorBody()?.let {
+                                                              moshi.fromJson(it.string())
+                                                          } ?: ErrorResponse().apply {
+                                                              error = t.message
+                                                          }
+                                                      } else {
+                                                          ErrorResponse().apply {
+                                                              error = t.message
+                                                          }
+                                                      })
                             }
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
@@ -147,14 +149,16 @@ class LoginActivity : AccountAuthenticatorActivity() {
                             .map { response -> ResponseModel.success(response) }
                             .onErrorReturn { t ->
                                 ResponseModel.failure(if (t is HttpException) {
-                                    moshi
-                                        .adapter(ErrorResponse::class.java)
-                                        .fromJson(t.response().errorBody().string())
-                                } else {
-                                    ErrorResponse().apply {
-                                        error = t.message
-                                    }
-                                })
+                                                          t.response().errorBody()?.let {
+                                                              moshi.fromJson(it.string())
+                                                          } ?: ErrorResponse().apply {
+                                                              error = t.message
+                                                          }
+                                                      } else {
+                                                          ErrorResponse().apply {
+                                                              error = t.message
+                                                          }
+                                                      })
                             }
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())

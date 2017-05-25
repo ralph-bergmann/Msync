@@ -58,3 +58,22 @@
 -keep class com.squareup.moshi.** { *; }
 -keep interface com.squareup.moshi.** { *; }
 -keep class eu.the4thfloor.msync.api.models.** { *; }
+
+
+# remove Timber and Log calls
+-assumenosideeffects class timber.log.Timber {
+    public static *** plant(...);
+    public static *** v(...);
+    public static *** i(...);
+    public static *** w(...);
+    public static *** d(...);
+    public static *** e(...);
+ }
+-assumenosideeffects class android.util.Log {
+    public static *** isLoggable(...);
+    public static *** v(...);
+    public static *** i(...);
+    public static *** w(...);
+    public static *** d(...);
+    public static *** e(...);
+}
