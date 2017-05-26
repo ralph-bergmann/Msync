@@ -45,6 +45,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:2.4.0-alpha7'
         classpath 'com.google.gms:google-services:3.0.0'
+        classpath 'com.google.firebase:firebase-plugins:1.0.5'
         classpath 'com.github.triplet.gradle:play-publisher:1.2.0'
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.14.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${rootProject.ext.libs.kotlin}"
