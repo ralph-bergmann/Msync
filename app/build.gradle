@@ -8,9 +8,6 @@ apply plugin: 'kotlin-kapt'
 def cfg = rootProject.ext.configuration
 def libs = rootProject.ext.libs
 
-if (cfg.hasKeyfile) {
-    apply from: '../keystore/signing.gradle'
-}
 
 android {
     compileSdkVersion cfg.compileVersion
@@ -45,12 +42,14 @@ android {
     }
 
     if (cfg.hasKeyfile) {
+        Properties keystoreProperties = new Properties()
+        keystoreProperties.load(new FileInputStream('./keystore/keystore.properties'))
         signingConfigs {
             release {
-                keyAlias project.signing.keyAlias
-                keyPassword project.signing.keyPassword
-                storeFile file(project.signing.storeFilePath)
-                storePassword project.signing.storePassword
+                keyAlias keystoreProperties.keyAlias
+                keyPassword keystoreProperties.keyPassword
+                storeFile file(keystoreProperties.storeFile)
+                storePassword keystoreProperties.storePassword
             }
         }
     }
@@ -130,7 +129,7 @@ android {
 }
 
 play {
-    track = 'rollout' // or 'production' or 'beta' or 'alpha'
+    track = 'alpha' // or 'production' or 'beta' or 'alpha'
     userFraction = 0.2 // only necessary for 'rollout', in this case default is 0.1 (10% of the target)
     untrackOld = true // will untrack 'alpha' while upload to 'beta'
 }

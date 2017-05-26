@@ -12,7 +12,7 @@ buildscript {
         version_name     : "v1.0.3",
         gitSha           : "git rev-parse --short HEAD".execute([], project.rootDir).text.trim(),
         buildTime        : new Date().format("yyyy-MM-dd"),
-        hasKeyfile       : file('./keystore/signing.gradle').exists(),
+        hasKeyfile       : file('./keystore/keystore.properties').exists(),
     ]
 
     ext.libs = [
