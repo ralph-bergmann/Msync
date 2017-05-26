@@ -131,7 +131,7 @@ android {
 
 play {
     track = 'rollout' // or 'production' or 'beta' or 'alpha'
-    // userFraction = 0.2 // only necessary for 'rollout', in this case default is 0.1 (10% of the target)
+    userFraction = 1.0 // only necessary for 'rollout', in this case default is 0.1 (10% of the target)
     untrackOld = true // will untrack 'alpha' while upload to 'beta'
 }
 
