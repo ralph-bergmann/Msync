@@ -189,10 +189,16 @@ fun sync(secureApi: SecureApi,
                         .map { response -> ResponseModel.success(response) }
                         .onErrorReturn { t ->
                             ResponseModel.failure(if (t is HttpException) {
-                                moshi.fromJson(t.response().errorBody().string())
-                            } else {
-                                null
-                            })
+                                                      t.response().errorBody()?.let {
+                                                          moshi.fromJson(it.string())
+                                                      } ?: ErrorResponse().apply {
+                                                          error = t.message
+                                                      }
+                                                  } else {
+                                                      ErrorResponse().apply {
+                                                          error = t.message
+                                                      }
+                                                  })
                         }
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -210,10 +216,16 @@ fun sync(secureApi: SecureApi,
                         }
                         .onErrorReturn { t ->
                             ResponseModel.failure(if (t is HttpException) {
-                                moshi.fromJson(t.response().errorBody().string())
-                            } else {
-                                null
-                            })
+                                                      t.response().errorBody()?.let {
+                                                          moshi.fromJson(it.string())
+                                                      }?: ErrorResponse().apply {
+                                                          error = t.message
+                                                      }
+                                                  } else {
+                                                      ErrorResponse().apply {
+                                                          error = t.message
+                                                      }
+                                                  })
                         }
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
