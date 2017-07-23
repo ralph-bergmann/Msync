@@ -2,7 +2,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
-        android:key="pref_key_calendar_settings"
         android:title="@string/pref_header_calendar">
 
         <EditTextPreference
@@ -39,6 +38,7 @@
 
     </PreferenceCategory>
 
+
     <PreferenceCategory
         android:key="pref_key_sync_rsvp"
         android:title="@string/pref_header_sync_rsvp">
@@ -65,8 +65,8 @@
 
     </PreferenceCategory>
 
+
     <PreferenceCategory
-        android:key="pref_key_share_settings"
         android:title="@string/pref_header_share">
 
         <Preference
@@ -76,17 +76,34 @@
                 android:data="@string/pref_action_share"/>
         </Preference>
 
+    </PreferenceCategory>
+
+
+    <PreferenceCategory
+        android:title="@string/pref_header_account">
+
+        <Preference
+            android:title="@string/pref_title_logout"
+            android:key="pref_key_account">
+            <intent
+                android:action="@string/pref_action"
+                android:data="@string/pref_action_logout"/>
+        </Preference>
 
     </PreferenceCategory>
 
+
     <PreferenceCategory
-        android:key="pref_key_about"
         android:title="@string/pref_header_about">
 
         <Preference
             android:capitalize="words"
             android:key="pref_key_version"
-            android:title="@string/pref_title_version_name"/>
+            android:title="@string/pref_title_version_name">
+            <intent
+                android:action="@string/pref_action"
+                android:data="@string/pref_action_github"/>
+        </Preference>
 
     </PreferenceCategory>
 

@@ -34,6 +34,7 @@ android {
 
         resConfig "en"
         buildConfigField "String", "PLAYSTORE_LINK", "\"${props.playstore_link}\""
+        buildConfigField "String", "GITHUB_LINK", "\"${props.github_link}\""
         buildConfigField "String", "BUILD_DATE", "\"${cfg.buildTime}\""
         buildConfigField "String", "GIT_SHA", "\"${cfg.gitSha}\""
         buildConfigField "String", "MEETUP_OAUTH_KEY", "\"${props.meetup_oauth_key}\""
@@ -77,7 +78,7 @@ android {
     buildTypes.all { buildType ->
 
         def actionScheme = "msync"
-        def actionName = cfg.package + ".PREF_ACTION"
+        def actionName = cfg.package + buildType.name + ".PREF_ACTION"
 
         buildType.resValue "string", "pref_action", actionName
         buildType.manifestPlaceholders = [actionName: actionName, actionScheme: actionScheme]
@@ -89,6 +90,8 @@ android {
 
         addConstant("pref_action_sync_now", actionScheme + "://SYNC_NOW")
         addConstant("pref_action_share", actionScheme + "://SHARE")
+        addConstant("pref_action_logout", actionScheme + "://LOGOUT")
+        addConstant("pref_action_github", actionScheme + "://GITHUB")
 
         addConstant("account_type", cfg.package + buildType.applicationIdSuffix)
         addConstant("auth_token_type", cfg.package + buildType.applicationIdSuffix)
@@ -138,6 +141,9 @@ play {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
+
+    // support
+    implementation "com.android.support:customtabs:${libs.support}"
 
     // firebase
     implementation "com.google.firebase:firebase-crash:${libs.firebase}"

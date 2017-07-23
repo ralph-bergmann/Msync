@@ -45,6 +45,9 @@
     <string name="pref_header_share">Share</string>
     <string name="pref_title_share">Share</string>
 
+    <!-- account -->
+    <string name="pref_header_account">Account</string>
+    <string name="pref_title_logout">Logout</string>
 
 
     <!-- about -->
@@ -56,6 +59,7 @@
     <string name="last_synced">Last synced %s</string>
     <string name="please_log_in">Please log in to enable synchronisation.</string>
     <string name="please_approve_permissions">Please approve needed calendar permissions.</string>
+    <string name="logging_in">logging you in, please wait a moment</string>
 
 
 </resources>
