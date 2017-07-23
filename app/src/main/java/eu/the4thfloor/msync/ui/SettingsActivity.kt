@@ -36,6 +36,7 @@ import eu.the4thfloor.msync.R
 import eu.the4thfloor.msync.utils.FA_PROPERTY_SYNC_INTERVAL
 import eu.the4thfloor.msync.utils.checkSelfPermission
 import eu.the4thfloor.msync.utils.createSyncJobs
+import eu.the4thfloor.msync.utils.getAccount
 import eu.the4thfloor.msync.utils.updateCalendarColor
 import eu.the4thfloor.msync.utils.updateCalendarName
 import org.jetbrains.anko.defaultSharedPreferences
@@ -57,6 +58,7 @@ class SettingsActivity : PreferenceActivity(), SharedPreferences.OnSharedPrefere
         bindPreferenceSummaryToValue(findPreference("pref_key_sync_frequency"))
         bindPreferenceSummaryToValue(findPreference("pref_key_last_sync"))
 
+        findPreference("pref_key_account").summary = getAccount()?.name
         findPreference("pref_key_version").summary = "$VERSION_NAME\nBuild Date: $BUILD_DATE\nGit Commit: $GIT_SHA"
 
         doFromSdk(Build.VERSION_CODES.M, { checkCalendarPermissions() })

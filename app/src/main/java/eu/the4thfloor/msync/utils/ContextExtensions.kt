@@ -17,6 +17,7 @@
 package eu.the4thfloor.msync.utils
 
 import android.accounts.Account
+import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
@@ -67,6 +68,14 @@ fun Context.createAccount(accountName: String, refreshToken: String): Flowable<A
                         e.onComplete()
                     }, BackpressureStrategy.LATEST)
 
+fun Context.deleteAccount() =
+    doFromSdk(Build.VERSION_CODES.LOLLIPOP_MR1,
+              {
+                  getAccount()?.let { accountManager.removeAccountExplicitly(it) }
+              },
+              {
+                  getAccount()?.let { accountManager.removeAccount(it, null, null) }
+              })
 
 fun Context.createSyncJobs(init: Boolean) =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

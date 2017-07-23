@@ -17,9 +17,19 @@
 package eu.the4thfloor.msync.ui
 
 import android.app.Activity
+import android.content.ComponentName
+import android.net.Uri
 import android.os.Bundle
+import android.support.customtabs.CustomTabsCallback
+import android.support.customtabs.CustomTabsClient
+import android.support.customtabs.CustomTabsIntent
+import android.support.customtabs.CustomTabsServiceConnection
+import eu.the4thfloor.msync.BuildConfig
+import eu.the4thfloor.msync.R
+import eu.the4thfloor.msync.utils.CustomTabsHelper
 import eu.the4thfloor.msync.utils.hasAccount
 import org.jetbrains.anko.startActivity
+import java.lang.ref.WeakReference
 
 class CheckLoginStatusActivity : Activity() {
 
@@ -28,9 +38,65 @@ class CheckLoginStatusActivity : Activity() {
 
         if (hasAccount()) {
             startActivity<SettingsActivity>()
+            finish()
         } else {
-            startActivity<LoginActivity>()
+            loadCustomTab()
         }
-        finish()
+    }
+
+    private fun loadCustomTab() {
+        val uri = Uri.Builder()
+            .scheme("https")
+            .authority("secure.meetup.com")
+            .appendPath("oauth2")
+            .appendPath("authorize")
+            .appendQueryParameter("client_id", BuildConfig.MEETUP_OAUTH_KEY)
+            .appendQueryParameter("redirect_uri", BuildConfig.MEETUP_OAUTH_REDIRECT_URI)
+            .appendQueryParameter("response_type", "code")
+            .appendQueryParameter("set_mobile", "on")
+            .build()
+
+        CustomTabsHelper.getPackageNameToUse(this, uri)?.let {
+            CustomTabsClient.bindCustomTabsService(this, it, Connection(this, uri, it))
+        }
+    }
+
+    private class Connection(activity: CheckLoginStatusActivity,
+                             private val uri: Uri,
+                             private val packageName: String,
+                             private val ref: WeakReference<CheckLoginStatusActivity> = WeakReference(activity)) : CustomTabsServiceConnection() {
+
+        override fun onCustomTabsServiceConnected(name: ComponentName, client: CustomTabsClient) {
+            ref.get()?.let {
+                val session = client.newSession(Callback(it))
+                CustomTabsIntent.Builder(session)
+                    .apply {
+                        setToolbarColor(it.resources.getColor(R.color.red))
+                        enableUrlBarHiding()
+                    }
+                    .build()
+                    .apply {
+                        intent.`package` = packageName
+                    }
+                    .launchUrl(it, uri)
+            }
+        }
+
+        override fun onServiceDisconnected(name: ComponentName) {
+
+        }
+    }
+
+    private class Callback(activity: CheckLoginStatusActivity,
+                           private val ref: WeakReference<CheckLoginStatusActivity> = WeakReference(activity)) : CustomTabsCallback() {
+
+        override fun onNavigationEvent(navigationEvent: Int, extras: Bundle?) {
+            super.onNavigationEvent(navigationEvent, extras)
+            when (navigationEvent) {
+                TAB_HIDDEN -> {
+                    ref.get()?.finish()
+                }
+            }
+        }
     }
 }

@@ -18,18 +18,12 @@ package eu.the4thfloor.msync.ui
 
 import android.Manifest
 import android.accounts.AccountAuthenticatorActivity
+import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.support.annotation.RequiresApi
 import android.support.annotation.RequiresPermission
-import android.view.View
 import android.view.Window
-import android.webkit.WebResourceRequest
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.crash.FirebaseCrash
 import com.jakewharton.retrofit2.adapter.rxjava2.HttpException
@@ -59,11 +53,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.processors.PublishProcessor
 import io.reactivex.schedulers.Schedulers
-import kotlinx.android.synthetic.main.activity_login.*
 import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.startActivity
 import timber.log.Timber
-import java.lang.ref.WeakReference
 import javax.inject.Inject
 
 class LoginActivity : AccountAuthenticatorActivity() {
@@ -83,33 +75,28 @@ class LoginActivity : AccountAuthenticatorActivity() {
         setContentView(R.layout.activity_login)
 
         MSyncApp.graph.inject(this)
+        bind()
 
-        webView?.let {
+        handleIntent(intent)
+    }
 
-            it.setWebViewClient(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                                    MyWebViewClientNougat(this)
-                                } else {
-                                    MyWebViewClient(this)
-                                })
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleIntent(intent)
+    }
 
-            val url = Uri.Builder()
-                .scheme("https")
-                .authority("secure.meetup.com")
-                .appendPath("oauth2")
-                .appendPath("authorize")
-                .appendQueryParameter("client_id", MEETUP_OAUTH_KEY)
-                .appendQueryParameter("redirect_uri", MEETUP_OAUTH_REDIRECT_URI)
-                .appendQueryParameter("response_type", "code")
-                .appendQueryParameter("scope", "rsvp")
-                .appendQueryParameter("set_mobile", "on")
-                .build().toString()
-
-            it.loadUrl(url)
+    private fun handleIntent(intent: Intent) {
+        intent.action?.let {
+            if (it.equals(Intent.ACTION_VIEW, true)) {
+                intent.data.getQueryParameter("code")?.let {
+                    loadToken(it)
+                    true
+                }
+            }
         }
     }
 
-    override fun onStart() {
-        super.onStart()
+    private fun bind() {
 
         val moshi = Moshi.Builder().build().adapter(ErrorResponse::class.java)
         val accessTransformer =
@@ -197,7 +184,6 @@ class LoginActivity : AccountAuthenticatorActivity() {
             .add(request
                      .compose(requestTransformer)
                      .subscribe({ (inProgress, success, response, error) ->
-                                    progressBar.visibility = if (inProgress) View.VISIBLE else View.GONE
                                     if (!inProgress) {
                                         if (success && response != null) {
                                             when (response) {
@@ -223,42 +209,14 @@ class LoginActivity : AccountAuthenticatorActivity() {
                                 },
                                 { error ->
                                     Timber.e(error, "failed to access api")
-                                    progressBar.visibility = View.GONE
                                     FirebaseCrash.report(error)
                                     showError(error.message)
                                 }))
     }
 
-    override fun onStop() {
-        super.onStop()
+    override fun onDestroy() {
+        super.onDestroy()
         disposables.clear()
-    }
-
-    override fun onBackPressed() {
-        if (webView?.canGoBack() ?: false)
-            webView?.goBack()
-        else
-            super.onBackPressed()
-    }
-
-    private fun handleUri(uri: Uri): Boolean {
-        Timber.i("uri: %s", uri)
-        if (!uri.toString().startsWith(MEETUP_OAUTH_REDIRECT_URI)) {
-            return false
-        }
-
-        return uri.getQueryParameter("code")?.let {
-            loadToken(it)
-            true
-        } ?: false
-    }
-
-    private fun onPageStarted() {
-        progressBar.visibility = View.VISIBLE
-    }
-
-    private fun onPageFinished() {
-        progressBar.visibility = View.GONE
     }
 
     private fun loadToken(code: String) {
@@ -331,38 +289,6 @@ class LoginActivity : AccountAuthenticatorActivity() {
 
     private fun showError(message: String?) {
         // TODO
-    }
-
-    private class MyWebViewClient(activity: LoginActivity,
-                                  private val ref: WeakReference<LoginActivity> = WeakReference(activity)) : WebViewClient() {
-
-
-        override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean =
-            ref.get()?.handleUri(Uri.parse(url)) ?: false
-
-        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-            ref.get()?.onPageStarted()
-        }
-
-        override fun onPageFinished(view: WebView?, url: String?) {
-            ref.get()?.onPageFinished()
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.N)
-    private class MyWebViewClientNougat(activity: LoginActivity,
-                                        private val ref: WeakReference<LoginActivity> = WeakReference(activity)) : WebViewClient() {
-
-        override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean =
-            ref.get()?.handleUri(request.url) ?: false
-
-        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-            ref.get()?.onPageStarted()
-        }
-
-        override fun onPageFinished(view: WebView?, url: String?) {
-            ref.get()?.onPageFinished()
-        }
     }
 }
 

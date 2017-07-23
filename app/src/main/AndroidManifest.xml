@@ -26,13 +26,28 @@
 
         <activity
             android:name=".ui.CheckLoginStatusActivity"
-            android:theme="@android:style/Theme.NoDisplay"/>
+            android:launchMode="singleTask"
+            android:theme="@style/AppTheme.NoUI"/>
 
         <activity
             android:name=".ui.NotificationPermissionsActivity"
+            android:launchMode="singleTask"
             android:theme="@style/AppTheme.NoUI"/>
 
-        <activity android:name=".ui.LoginActivity"/>
+        <activity
+            android:name=".ui.LoginActivity"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <data
+                    android:host="login"
+                    android:scheme="msync"/>
+            </intent-filter>
+        </activity>
 
         <activity
             android:name=".ui.SettingsActivity"

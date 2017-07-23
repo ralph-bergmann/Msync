@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.firebase.firebase-crash'
+apply plugin: "net.ltgt.errorprone"
 apply plugin: 'com.github.triplet.play'
 apply plugin: 'com.github.ben-manes.versions'
 apply plugin: 'kotlin-android'
@@ -33,6 +34,7 @@ android {
 
         resConfig "en"
         buildConfigField "String", "PLAYSTORE_LINK", "\"${props.playstore_link}\""
+        buildConfigField "String", "GITHUB_LINK", "\"${props.github_link}\""
         buildConfigField "String", "BUILD_DATE", "\"${cfg.buildTime}\""
         buildConfigField "String", "GIT_SHA", "\"${cfg.gitSha}\""
         buildConfigField "String", "MEETUP_OAUTH_KEY", "\"${props.meetup_oauth_key}\""
@@ -76,7 +78,7 @@ android {
     buildTypes.all { buildType ->
 
         def actionScheme = "msync"
-        def actionName = cfg.package + ".PREF_ACTION"
+        def actionName = cfg.package + buildType.name + ".PREF_ACTION"
 
         buildType.resValue "string", "pref_action", actionName
         buildType.manifestPlaceholders = [actionName: actionName, actionScheme: actionScheme]
@@ -88,6 +90,8 @@ android {
 
         addConstant("pref_action_sync_now", actionScheme + "://SYNC_NOW")
         addConstant("pref_action_share", actionScheme + "://SHARE")
+        addConstant("pref_action_logout", actionScheme + "://LOGOUT")
+        addConstant("pref_action_github", actionScheme + "://GITHUB")
 
         addConstant("account_type", cfg.package + buildType.applicationIdSuffix)
         addConstant("auth_token_type", cfg.package + buildType.applicationIdSuffix)
@@ -131,51 +135,56 @@ android {
 
 play {
     track = 'rollout' // or 'production' or 'beta' or 'alpha'
-    // userFraction = 0.2 // only necessary for 'rollout', in this case default is 0.1 (10% of the target)
+    userFraction = 1.0 // only necessary for 'rollout', in this case default is 0.1 (10% of the target)
     untrackOld = true // will untrack 'alpha' while upload to 'beta'
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+
+    // support
+    implementation "com.android.support:customtabs:${libs.support}"
 
     // firebase
-    compile "com.google.firebase:firebase-crash:${libs.firebase}"
-    compile "com.firebase:firebase-jobdispatcher:${libs.firebase_jobdispatcher}"
+    implementation "com.google.firebase:firebase-crash:${libs.firebase}"
+    implementation "com.firebase:firebase-jobdispatcher:${libs.firebase_jobdispatcher}"
 
     // kotlin
-    compile "org.jetbrains.kotlin:kotlin-stdlib:${libs.kotlin}"
-    compile "org.jetbrains.kotlinx:kotlinx-coroutines-android:${libs.coroutines}"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:${libs.kotlin}"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:${libs.coroutines}"
 
     // anko
-    compile "org.jetbrains.anko:anko-sdk15:${libs.anko}" // sdk19, sdk21, sdk23 are also available
+    implementation "org.jetbrains.anko:anko-sdk15:${libs.anko}"
+    // sdk19, sdk21, sdk23 are also available
 
     // timber
-    compile "com.jakewharton.timber:timber:${libs.timber}"
+    implementation "com.jakewharton.timber:timber:${libs.timber}"
 
     // stetho
-    debugCompile "com.facebook.stetho:stetho:${libs.stetho}"
-    debugCompile "com.facebook.stetho:stetho-okhttp3:${libs.stetho}"
+    debugImplementation "com.facebook.stetho:stetho:${libs.stetho}"
+    debugImplementation "com.facebook.stetho:stetho-okhttp3:${libs.stetho}"
 
     // rx
-    compile "io.reactivex.rxjava2:rxjava:${libs.rxjava}"
-    compile "io.reactivex.rxjava2:rxandroid:${libs.rxandroid}"
+    implementation "io.reactivex.rxjava2:rxjava:${libs.rxjava}"
+    implementation "io.reactivex.rxjava2:rxandroid:${libs.rxandroid}"
 
     // retrofit
-    compile "com.squareup.retrofit2:retrofit:${libs.retrofit}"
-    compile "com.squareup.retrofit2:converter-moshi:${libs.retrofit}"
-    compile "com.jakewharton.retrofit:retrofit2-rxjava2-adapter:${libs.retrofit_rxjava2_adapter}"
-    debugCompile "com.squareup.okhttp3:logging-interceptor:${libs.okhttp_logging}"
+    implementation "com.squareup.retrofit2:retrofit:${libs.retrofit}"
+    implementation "com.squareup.retrofit2:converter-moshi:${libs.retrofit}"
+    implementation "com.jakewharton.retrofit:retrofit2-rxjava2-adapter:${libs.retrofit_rxjava2_adapter}"
+    implementation "com.squareup.okhttp3:okhttp:${libs.okhttp}"
+    debugImplementation "com.squareup.okhttp3:logging-interceptor:${libs.okhttp}"
 
     // leakcanary
-    debugCompile "com.squareup.leakcanary:leakcanary-android:${libs.leakcanary}"
-    releaseCompile "com.squareup.leakcanary:leakcanary-android-no-op:${libs.leakcanary}"
+    debugImplementation "com.squareup.leakcanary:leakcanary-android:${libs.leakcanary}"
+    releaseImplementation "com.squareup.leakcanary:leakcanary-android-no-op:${libs.leakcanary}"
 
     // dagger2
-    compile "com.google.dagger:dagger:${libs.dagger2}"
+    implementation "com.google.dagger:dagger:${libs.dagger2}"
     kapt "com.google.dagger:dagger-compiler:${libs.dagger2}"
 
     // ColorPickerPreference
-    compile "net.margaritov.preference.colorpicker.ColorPickerPreference:ColorPickerPreference:${libs.colorpicker}"
+    implementation "net.margaritov.preference.colorpicker.ColorPickerPreference:ColorPickerPreference:${libs.colorpicker}"
 }
 
 
