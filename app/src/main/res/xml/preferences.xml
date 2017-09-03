@@ -14,7 +14,7 @@
             android:singleLine="true"
             android:title="@string/pref_title_calendar_name"/>
 
-        <net.margaritov.preference.colorpicker.ColorPickerPreference
+        <com.kizitonwose.colorpreference.ColorPreference
             android:defaultValue="@color/red"
             android:key="pref_key_calendar_color"
             android:title="@string/pref_title_calendar_color"/>
