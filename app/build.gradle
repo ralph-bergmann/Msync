@@ -143,6 +143,7 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     // support
+    implementation "com.android.support:appcompat-v7:${libs.support}"
     implementation "com.android.support:customtabs:${libs.support}"
 
     // firebase
@@ -184,7 +185,7 @@ dependencies {
     kapt "com.google.dagger:dagger-compiler:${libs.dagger2}"
 
     // ColorPickerPreference
-    implementation "net.margaritov.preference.colorpicker.ColorPickerPreference:ColorPickerPreference:${libs.colorpicker}"
+    implementation "com.github.kizitonwose.colorpreference:core:${libs.colorpicker}"
 }
 
 
