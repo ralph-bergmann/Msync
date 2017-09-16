@@ -23,7 +23,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.support.v4.app.NotificationCompat
-import com.google.firebase.crash.FirebaseCrash
 import com.jakewharton.retrofit2.adapter.rxjava2.HttpException
 import com.squareup.moshi.Moshi
 import eu.the4thfloor.msync.BuildConfig
@@ -260,14 +259,12 @@ fun sync(secureApi: SecureApi,
                                         }
                                     } else {
                                         Timber.e("!success %s", error)
-                                        FirebaseCrash.report(Exception(error?.error_description))
                                         done()
                                     }
                                 }
                             },
                             { error ->
                                 Timber.e(error, "failed to access api")
-                                FirebaseCrash.report(error)
                                 done()
                             }))
 

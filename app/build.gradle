@@ -134,25 +134,33 @@ android {
 }
 
 play {
-    track = 'production' // or 'rollout' or 'beta' or 'alpha'
+    track = 'alpha' // 'production' or 'rollout' or 'beta' or 'alpha'
 //    userFraction = 1.0 // only necessary for 'rollout', in this case default is 0.1 (10% of the target)
     untrackOld = true // will untrack 'alpha' while upload to 'beta'
+}
+
+configurations.all {
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+        if (details.requested.group == 'com.android.support') {
+            details.useVersion "${libs.support}"
+        }
+    }
 }
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     // support
-    implementation "com.android.support:appcompat-v7:${libs.support}"
     implementation "com.android.support:customtabs:${libs.support}"
 
     // firebase
-    implementation "com.google.firebase:firebase-crash:${libs.firebase}"
-    implementation "com.firebase:firebase-jobdispatcher:${libs.firebase_jobdispatcher}"
+    implementation("com.firebase:firebase-jobdispatcher:${libs.firebase_jobdispatcher}") {
+        transitive = false
+    }
 
     // kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib:${libs.kotlin}"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:${libs.coroutines}"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:${libs.kotlin_coroutines}"
 
     // anko
     implementation "org.jetbrains.anko:anko-sdk15:${libs.anko}"
@@ -185,16 +193,18 @@ dependencies {
     kapt "com.google.dagger:dagger-compiler:${libs.dagger2}"
 
     // ColorPickerPreference
-    implementation "com.github.kizitonwose.colorpreference:core:${libs.colorpicker}"
+    implementation("com.github.kizitonwose.colorpreference:core:${libs.colorpicker}") {
+        transitive = false
+    }
 }
 
 
 task release
 
 task archiveRelease(type: Copy) {
-    from './build/outputs/apk', './build/outputs/'
+    from './build/outputs/'
     into "../releases/${rootProject.ext.configuration.version_code}"
-    include('app-release.apk', 'mapping/release/mapping.txt')
+    include('apk/release/app-release.apk', 'mapping/release/mapping.txt')
     rename('app-release.apk', "${rootProject.ext.configuration.package}_${rootProject.ext.configuration.version_name}_${rootProject.ext.configuration.version_code}.apk")
 }
 
@@ -206,8 +216,11 @@ project.afterEvaluate {
     def publishApkRelease = project.tasks.getByName("publishApkRelease")
     publishApkRelease.dependsOn assembleRelease
 
-    release.dependsOn publishApkRelease, firebaseUploadReleaseProguardMapping, archiveRelease
+    firebaseUploadReleaseProguardMapping.shouldRunAfter assembleRelease
+    archiveRelease.shouldRunAfter assembleRelease
+
+    release.dependsOn publishApkRelease, archiveRelease
 }
 
 // ADD THIS AT THE BOTTOM
-apply plugin: 'com.google.gms.google-services'
+//apply plugin: 'com.google.gms.google-services'

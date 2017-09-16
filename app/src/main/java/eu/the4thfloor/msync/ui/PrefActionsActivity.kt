@@ -19,7 +19,6 @@ package eu.the4thfloor.msync.ui
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import com.google.firebase.analytics.FirebaseAnalytics
 import eu.the4thfloor.msync.BuildConfig.GITHUB_LINK
 import eu.the4thfloor.msync.BuildConfig.PLAYSTORE_LINK
 import eu.the4thfloor.msync.BuildConfig.PREF_ACTION_GITHUB
@@ -30,12 +29,9 @@ import eu.the4thfloor.msync.MSyncApp
 import eu.the4thfloor.msync.utils.createSyncJobs
 import eu.the4thfloor.msync.utils.deleteAccount
 import org.jetbrains.anko.browse
-import javax.inject.Inject
 
 
 class PrefActionsActivity : Activity() {
-
-    @Inject lateinit var fa: FirebaseAnalytics
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,7 +42,6 @@ class PrefActionsActivity : Activity() {
             if (PREF_ACTION_SYNC_NOW.equals(it, ignoreCase = true)) {
                 createSyncJobs(true)
             } else if (PREF_ACTION_SHARE.equals(it, ignoreCase = true)) {
-                fa.logEvent("share", null)
                 startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND)
                                                        .apply {
                                                            type = "text/plain"
@@ -54,11 +49,9 @@ class PrefActionsActivity : Activity() {
                                                        },
                                                    null))
             } else if (PREF_ACTION_LOGOUT.equals(it, ignoreCase = true)) {
-                fa.logEvent("logout", null)
                 deleteAccount()
                 finishAffinity()
             } else if (PREF_ACTION_GITHUB.equals(it, ignoreCase = true)) {
-                fa.logEvent("github", null)
                 browse(GITHUB_LINK, true)
             }
         }
