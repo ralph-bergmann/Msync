@@ -24,8 +24,6 @@ import android.os.Build
 import android.os.Bundle
 import android.support.annotation.RequiresPermission
 import android.view.Window
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.crash.FirebaseCrash
 import com.jakewharton.retrofit2.adapter.rxjava2.HttpException
 import com.squareup.moshi.Moshi
 import eu.the4thfloor.msync.BuildConfig.MEETUP_OAUTH_KEY
@@ -40,7 +38,6 @@ import eu.the4thfloor.msync.api.models.CreateAccountResponse
 import eu.the4thfloor.msync.api.models.ErrorResponse
 import eu.the4thfloor.msync.api.models.Response
 import eu.the4thfloor.msync.api.models.SelfResponse
-import eu.the4thfloor.msync.utils.FA_PROPERTY_SYNC_INTERVAL
 import eu.the4thfloor.msync.utils.checkSelfPermission
 import eu.the4thfloor.msync.utils.createAccount
 import eu.the4thfloor.msync.utils.createCalendar
@@ -62,7 +59,6 @@ class LoginActivity : AccountAuthenticatorActivity() {
 
     @Inject lateinit var secureApi: SecureApi
     @Inject lateinit var meetupApi: MeetupApi
-    @Inject lateinit var fa: FirebaseAnalytics
 
     private val disposables = CompositeDisposable()
     private val request = PublishProcessor.create<Request>()
@@ -202,14 +198,12 @@ class LoginActivity : AccountAuthenticatorActivity() {
                                             }
                                         } else {
                                             Timber.e("!success %s", error)
-                                            FirebaseCrash.report(Exception("failed to execute: $response"))
                                             showError("failed to execute: $response")
                                         }
                                     }
                                 },
                                 { error ->
                                     Timber.e(error, "failed to access api")
-                                    FirebaseCrash.report(error)
                                     showError(error.message)
                                 }))
     }
@@ -278,7 +272,6 @@ class LoginActivity : AccountAuthenticatorActivity() {
 
     private fun createSyncJobs() {
         val syncFrequency = defaultSharedPreferences.getString("pref_key_sync_frequency", "1440")
-        fa.setUserProperty(FA_PROPERTY_SYNC_INTERVAL, syncFrequency)
         createSyncJobs(false)
     }
 
