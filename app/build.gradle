@@ -203,9 +203,10 @@ task release
 
 task archiveRelease(type: Copy) {
     from './build/outputs/'
-    into "../releases/${rootProject.ext.configuration.version_code}"
+    into "../releases/${rootProject.ext.configuration.version_code}_${rootProject.ext.configuration.version_name}"
     include('apk/release/app-release.apk', 'mapping/release/mapping.txt')
-    rename('app-release.apk', "${rootProject.ext.configuration.package}_${rootProject.ext.configuration.version_name}_${rootProject.ext.configuration.version_code}.apk")
+    rename('app-release.apk', "${rootProject.ext.configuration.package}_${rootProject.ext.configuration.version_code}_${rootProject.ext.configuration.version_name}.apk")
+    rename('mapping.txt', "mapping_${rootProject.ext.configuration.version_code}_${rootProject.ext.configuration.version_name}.txt")
 }
 
 project.afterEvaluate {
@@ -216,10 +217,9 @@ project.afterEvaluate {
     def publishApkRelease = project.tasks.getByName("publishApkRelease")
     publishApkRelease.dependsOn assembleRelease
 
-    firebaseUploadReleaseProguardMapping.shouldRunAfter assembleRelease
-    archiveRelease.shouldRunAfter assembleRelease
+    archiveRelease.shouldRunAfter publishApkRelease
 
-    release.dependsOn publishApkRelease, archiveRelease
+    release.dependsOn publishApkRelease
 }
 
 // ADD THIS AT THE BOTTOM
