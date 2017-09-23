@@ -17,7 +17,6 @@
 package eu.the4thfloor.msync.utils
 
 import android.accounts.Account
-import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
@@ -51,8 +50,8 @@ fun Context.hasAccount(): Boolean =
 fun Context.getAccount(): Account? =
     accountManager.getAccountsByType(BuildConfig.ACCOUNT_TYPE).firstOrNull()
 
-fun Context.getRefreshToken(): String =
-    accountManager.getPassword(getAccount())
+fun Context.getRefreshToken(): String? =
+    getAccount()?.let { accountManager.getPassword(it) }
 
 fun Context.createAccount(accountName: String, refreshToken: String): Flowable<Account> =
     Flowable.create({ e ->
