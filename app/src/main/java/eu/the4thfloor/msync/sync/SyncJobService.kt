@@ -42,7 +42,7 @@ import eu.the4thfloor.msync.utils.addEvent
 import eu.the4thfloor.msync.utils.apply
 import eu.the4thfloor.msync.utils.checkSelfPermission
 import eu.the4thfloor.msync.utils.deleteEventsNotIn
-import eu.the4thfloor.msync.utils.hasAccount
+import eu.the4thfloor.msync.utils.getRefreshToken
 import io.reactivex.Flowable
 import io.reactivex.FlowableTransformer
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -135,12 +135,12 @@ private fun Context.showPermissionsNotification() {
 
 fun sync(secureApi: SecureApi,
          meetupApi: MeetupApi,
-         refreshToken: String,
          disposables: CompositeDisposable,
          context: Context,
          finish: () -> Unit) {
 
-    if (!context.hasAccount()) {
+    val refreshToken = context.getRefreshToken()
+    if (refreshToken == null) {
         context.showLoginNotification()
         return
     }

@@ -23,7 +23,6 @@ import eu.the4thfloor.msync.MSyncApp
 import eu.the4thfloor.msync.api.MeetupApi
 import eu.the4thfloor.msync.api.SecureApi
 import eu.the4thfloor.msync.sync.sync
-import eu.the4thfloor.msync.utils.getRefreshToken
 import io.reactivex.disposables.CompositeDisposable
 import javax.inject.Inject
 
@@ -40,7 +39,7 @@ class SyncJobService : JobService() {
     }
 
     override fun onStartJob(job: JobParameters): Boolean {
-        sync(secureApi, meetupApi, getRefreshToken(), disposables, applicationContext) {
+        sync(secureApi, meetupApi, disposables, applicationContext) {
             jobFinished(job, false)
         }
         return true
