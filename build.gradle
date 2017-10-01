@@ -22,8 +22,8 @@ buildscript {
         firebase                : "11.2.2",
         firebase_jobdispatcher  : '0.8.2',
         jsr305                  : "3.0.1",
-        kotlin                  : "1.1.50",
-        kotlin_coroutines       : "0.19-alpha-8",
+        kotlin                  : "1.2.0-beta-31",
+        kotlin_coroutines       : "0.19",
         leakcanary              : "1.5.4",
         okhttp                  : "3.9.0",
         retrofit                : "2.3.0",
@@ -40,6 +40,7 @@ buildscript {
         mavenCentral()
         maven { url 'https://maven.google.com' }
         maven { url "https://plugins.gradle.org/m2/" }
+        maven { url 'http://dl.bintray.com/kotlin/kotlin-eap-1.2' }
     }
 
     dependencies {
@@ -64,6 +65,7 @@ allprojects {
         mavenCentral()
         maven { url 'https://maven.google.com' }
         maven { url "https://jitpack.io" }
+        maven { url 'http://dl.bintray.com/kotlin/kotlin-eap-1.2' }
     }
 }
 

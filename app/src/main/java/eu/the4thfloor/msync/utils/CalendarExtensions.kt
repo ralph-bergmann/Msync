@@ -34,8 +34,7 @@ import org.jetbrains.anko.defaultSharedPreferences
 import timber.log.Timber
 import java.util.concurrent.TimeUnit.HOURS
 
-@RequiresPermission(allOf = arrayOf(Manifest.permission.READ_CALENDAR,
-                                    Manifest.permission.WRITE_CALENDAR))
+@RequiresPermission(allOf = [(Manifest.permission.READ_CALENDAR), (Manifest.permission.WRITE_CALENDAR)])
 fun Context.getCalendarID(): Long? {
 
     val account = getAccount() ?: return null
@@ -58,16 +57,13 @@ fun Context.getCalendarID(): Long? {
     }
 }
 
-@RequiresPermission(allOf = arrayOf(Manifest.permission.READ_CALENDAR,
-                                    Manifest.permission.WRITE_CALENDAR))
+@RequiresPermission(allOf = [(Manifest.permission.READ_CALENDAR), (Manifest.permission.WRITE_CALENDAR)])
 fun Context.createCalendar(): Long? {
 
     val account = getAccount() ?: return null
 
-    val calendarName = defaultSharedPreferences.getString("pref_key_calendar_name",
-                                                          getString(R.string.pref_default_calendar_name))
-    val calendarColor = defaultSharedPreferences.getInt("pref_key_calendar_color",
-                                                        resources.getColor(R.color.red))
+    val calendarName = defaultSharedPreferences.getString("pref_key_calendar_name", getString(R.string.pref_default_calendar_name))
+    val calendarColor = defaultSharedPreferences.getInt("pref_key_calendar_color", resources.getColor(R.color.red))
 
     val values = ContentValues()
     values.put(Calendars.NAME, calendarName)
@@ -80,8 +76,7 @@ fun Context.createCalendar(): Long? {
     values.put(Calendars.SYNC_EVENTS, 1)
     values.put(Calendars.CALENDAR_TIME_ZONE, Time.getCurrentTimezone())
 
-    return ContentUris.parseId(contentResolver.insert(contentUri(Calendars.CONTENT_URI, account),
-                                                      values))
+    return ContentUris.parseId(contentResolver.insert(contentUri(Calendars.CONTENT_URI, account), values))
 }
 
 fun Context.updateCalendarName() {
@@ -89,8 +84,7 @@ fun Context.updateCalendarName() {
     val account = getAccount() ?: return
     val id = getCalendarID() ?: return
 
-    val calendarName = defaultSharedPreferences.getString("pref_key_calendar_name",
-                                                          getString(R.string.pref_default_calendar_name))
+    val calendarName = defaultSharedPreferences.getString("pref_key_calendar_name", getString(R.string.pref_default_calendar_name))
 
     val values = ContentValues()
     values.put(Calendars.NAME, calendarName)
@@ -108,8 +102,7 @@ fun Context.updateCalendarColor() {
     val account = getAccount() ?: return
     val id = getCalendarID() ?: return
 
-    val calendarColor = defaultSharedPreferences.getInt("pref_key_calendar_color",
-                                                        resources.getColor(R.color.red))
+    val calendarColor = defaultSharedPreferences.getInt("pref_key_calendar_color", resources.getColor(R.color.red))
 
     val values = ContentValues()
     values.put(Calendars.CALENDAR_COLOR, calendarColor)
