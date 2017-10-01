@@ -21,12 +21,10 @@ import dagger.Provides
 import eu.the4thfloor.msync.MSyncApp
 import javax.inject.Singleton
 
-@Module(includes = arrayOf(NetworkModule::class))
+@Module(includes = [(NetworkModule::class)])
 class MainModule(private val app: MSyncApp) {
 
     @Provides
     @Singleton
-    internal fun provideApplication(): MSyncApp {
-        return app
-    }
+    internal fun provideApplication(): MSyncApp = app
 }

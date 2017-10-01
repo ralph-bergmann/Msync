@@ -27,7 +27,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import javax.inject.Singleton
 
-@Module(includes = arrayOf(OkHttpModule::class))
+@Module(includes = [(OkHttpModule::class)])
 class NetworkModule {
 
     private val SECURE_BASE_URL = "https://secure.meetup.com/oauth2/"
@@ -35,30 +35,17 @@ class NetworkModule {
 
     @Provides
     @Singleton
-    internal fun provideMoshi(): Moshi {
-        return Moshi.Builder().build()
-    }
+    internal fun provideMoshi(): Moshi = Moshi.Builder().build()
 
     @Provides
     @Singleton
     internal fun provideSecureApi(client: OkHttpClient, moshi: Moshi): SecureApi {
 
-        val apiClient = client
-            .newBuilder()
-            .addInterceptor { chain ->
-                chain.proceed(chain
-                                  .request()
-                                  .newBuilder()
-                                  .addHeader("Accept", "application/json")
-                                  .build())
-            }
-            .build()
-
         return Retrofit.Builder()
             .baseUrl(SECURE_BASE_URL)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .client(apiClient)
+            .client(client)
             .build()
             .create(SecureApi::class.java)
     }
@@ -67,15 +54,11 @@ class NetworkModule {
     @Singleton
     internal fun provideMeetupApi(client: OkHttpClient, moshi: Moshi): MeetupApi {
 
-        val apiClient = client
-            .newBuilder()
-            .build()
-
         return Retrofit.Builder()
             .baseUrl(API_BASE_URL)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .client(apiClient)
+            .client(client)
             .build()
             .create(MeetupApi::class.java)
     }

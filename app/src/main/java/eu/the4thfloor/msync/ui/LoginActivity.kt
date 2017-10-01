@@ -271,7 +271,6 @@ class LoginActivity : AccountAuthenticatorActivity() {
     }
 
     private fun createSyncJobs() {
-        val syncFrequency = defaultSharedPreferences.getString("pref_key_sync_frequency", "1440")
         createSyncJobs(false)
     }
 

@@ -75,7 +75,6 @@ class SettingsActivity : PreferenceActivity(), SharedPreferences.OnSharedPrefere
                 updateCalendarName()
             }
             "pref_key_sync_frequency" -> {
-                val syncFrequency = defaultSharedPreferences.getString("pref_key_sync_frequency", "1440")
                 createSyncJobs(false)
             }
             "pref_key_calendar_color" -> {

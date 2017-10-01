@@ -38,9 +38,8 @@ class AccessResponse : Response() {
     var expires_in: Long? = null
     var refresh_token: String? = null
 
-    override fun toString(): String {
-        return "AccessResponse(access_token=$access_token, token_type=$token_type, expires_in=$expires_in, refresh_token=$refresh_token)"
-    }
+    override fun toString(): String =
+        "AccessResponse(access_token=$access_token, token_type=$token_type, expires_in=$expires_in, refresh_token=$refresh_token)"
 }
 
 /**
@@ -53,9 +52,7 @@ class SelfResponse : Response() {
     var id: Long? = null
     var name: String? = null
 
-    override fun toString(): String {
-        return "SelfResponse(id=$id, name=$name)"
-    }
+    override fun toString(): String = "SelfResponse(id=$id, name=$name)"
 }
 
 class CalendarResponse(val events: List<Event>) : Response()
@@ -119,9 +116,7 @@ class Event {
     var group: EventGroup? = null
     var self: EventSelf? = null
 
-    override fun toString(): String {
-        return "Event(id=$id, name=$name, self=$self)"
-    }
+    override fun toString(): String = "Event(id=$id, name=$name, self=$self)"
 }
 
 class EventVenue {
@@ -133,34 +128,26 @@ class EventVenue {
     var city: String? = null
     var localized_country_name: String? = null
 
-    override fun toString(): String {
-        return "EventVenue(id=$id, name=$name)"
-    }
+    override fun toString(): String = "EventVenue(id=$id, name=$name)"
 }
 
 class EventGroup {
     var id: String? = null
     var name: String? = null
 
-    override fun toString(): String {
-        return "EventGroup(id=$id, name=$name)"
-    }
+    override fun toString(): String = "EventGroup(id=$id, name=$name)"
 }
 
 class EventSelf {
     var rsvp: EventRsvp? = null
 
-    override fun toString(): String {
-        return "EventSelf(rsvp=$rsvp)"
-    }
+    override fun toString(): String = "EventSelf(rsvp=$rsvp)"
 }
 
 class EventRsvp {
     var response: Rsvp? = null
 
-    override fun toString(): String {
-        return "EventRsvp(response=$response)"
-    }
+    override fun toString(): String = "EventRsvp(response=$response)"
 }
 
 enum class Rsvp(val value: Int) {
@@ -183,7 +170,6 @@ class ErrorResponse {
     var error_description: String? = null
     var error: String? = null
 
-    override fun toString(): String {
-        return "ErrorResponse(error_description=$error_description, error=$error)"
-    }
+    override fun toString(): String =
+        "ErrorResponse(error_description=$error_description, error=$error)"
 }

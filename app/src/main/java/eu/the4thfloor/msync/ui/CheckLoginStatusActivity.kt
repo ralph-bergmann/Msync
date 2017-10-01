@@ -26,7 +26,6 @@ import android.support.customtabs.CustomTabsIntent
 import android.support.customtabs.CustomTabsServiceConnection
 import eu.the4thfloor.msync.BuildConfig
 import eu.the4thfloor.msync.R
-import eu.the4thfloor.msync.utils.CustomTabsHelper
 import eu.the4thfloor.msync.utils.hasAccount
 import org.jetbrains.anko.startActivity
 import java.lang.ref.WeakReference
@@ -56,9 +55,9 @@ class CheckLoginStatusActivity : Activity() {
             .appendQueryParameter("set_mobile", "on")
             .build()
 
-        CustomTabsHelper.getPackageNameToUse(this, uri)?.let {
-            CustomTabsClient.bindCustomTabsService(this, it, Connection(this, uri, it))
-        }
+        CustomTabsClient.bindCustomTabsService(this,
+                                               "com.android.chrome",
+                                               Connection(this, uri, "com.android.chrome"))
     }
 
     private class Connection(activity: CheckLoginStatusActivity,
@@ -82,9 +81,7 @@ class CheckLoginStatusActivity : Activity() {
             }
         }
 
-        override fun onServiceDisconnected(name: ComponentName) {
-
-        }
+        override fun onServiceDisconnected(name: ComponentName) { }
     }
 
     private class Callback(activity: CheckLoginStatusActivity,

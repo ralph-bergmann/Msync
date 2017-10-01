@@ -38,22 +38,24 @@ class PrefActionsActivity : Activity() {
 
         MSyncApp.graph.inject(this)
 
-        intent?.dataString?.let {
-            if (PREF_ACTION_SYNC_NOW.equals(it, ignoreCase = true)) {
+        when (intent?.dataString) {
+            PREF_ACTION_SYNC_NOW -> {
                 createSyncJobs(true)
-            } else if (PREF_ACTION_SHARE.equals(it, ignoreCase = true)) {
+            }
+            PREF_ACTION_SHARE    -> {
                 startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND)
                                                        .apply {
                                                            type = "text/plain"
                                                            putExtra(Intent.EXTRA_TEXT, PLAYSTORE_LINK)
                                                        },
                                                    null))
-            } else if (PREF_ACTION_LOGOUT.equals(it, ignoreCase = true)) {
+            }
+            PREF_ACTION_LOGOUT   -> {
                 deleteAccount()
                 finishAffinity()
-            } else if (PREF_ACTION_GITHUB.equals(it, ignoreCase = true)) {
-                browse(GITHUB_LINK, true)
             }
+            PREF_ACTION_GITHUB   -> browse(GITHUB_LINK, true)
+            else                 -> { }
         }
 
         finish()

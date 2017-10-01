@@ -25,7 +25,7 @@ import eu.the4thfloor.msync.sync.lollipop.SyncJobService as SyncJobServiceLollip
 import eu.the4thfloor.msync.sync.prelollipop.SyncJobService as SyncJobServicePreLollipop
 
 @Singleton
-@Component(modules = arrayOf(MainModule::class))
+@Component(modules = [(MainModule::class)])
 interface MainComponent {
 
     fun inject(loginActivity: LoginActivity)
@@ -36,8 +36,7 @@ interface MainComponent {
 
     object Initializer {
 
-        fun init(mainModule: MainModule): MainComponent {
-            return DaggerMainComponent.builder().mainModule(mainModule).build()
-        }
+        fun init(mainModule: MainModule): MainComponent =
+            DaggerMainComponent.builder().mainModule(mainModule).build()
     }
 }

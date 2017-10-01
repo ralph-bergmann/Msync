@@ -45,9 +45,7 @@ class SyncJobService : JobService() {
         return true
     }
 
-    override fun onStopJob(job: JobParameters): Boolean {
-        return true
-    }
+    override fun onStopJob(job: JobParameters): Boolean = true
 
     override fun onDestroy() {
         super.onDestroy()
