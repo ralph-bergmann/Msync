@@ -4,7 +4,7 @@ buildscript {
 
     ext.configuration = [
         package          : "eu.the4thfloor.msync",
-        buildToolsVersion: '26.0.1',
+        buildToolsVersion: '26.0.2',
         minSdk           : 19,
         targetSdk        : 26,
         compileVersion   : 26,
@@ -16,20 +16,20 @@ buildscript {
     ]
 
     ext.libs = [
-        anko                    : "0.10.1",
+        anko                    : "0.10.2",
         colorpicker             : "1.0.3",
-        dagger2                 : '2.11',
+        dagger2                 : '2.12',
         firebase                : "11.2.2",
-        firebase_jobdispatcher  : '0.8.2',
+        firebase_jobdispatcher  : '0.8.4',
         jsr305                  : "3.0.1",
-        kotlin                  : "1.2.0-beta-31",
-        kotlin_coroutines       : "0.19",
+        kotlin                  : "1.2.0-beta-88",
+        kotlin_coroutines       : "0.20-alpha-6",
         leakcanary              : "1.5.4",
         okhttp                  : "3.9.0",
         retrofit                : "2.3.0",
         retrofit_rxjava2_adapter: "1.0.0",
         rxandroid               : "2.0.1",
-        rxjava                  : "2.1.4",
+        rxjava                  : "2.1.5",
         stetho                  : "1.5.0",
         support                 : "26.1.0",
         timber                  : "4.5.1",
@@ -44,7 +44,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.0-beta6'
+        classpath 'com.android.tools.build:gradle:3.0.0-rc2'
         classpath 'com.google.gms:google-services:3.0.0'
         classpath('com.google.firebase:firebase-plugins:1.1.0-alpha1') {
             exclude group: 'com.google.guava', module: 'guava-jdk5'
