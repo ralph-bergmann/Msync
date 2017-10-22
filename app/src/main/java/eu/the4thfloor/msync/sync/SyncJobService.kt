@@ -23,38 +23,27 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.support.v4.app.NotificationCompat
-import com.jakewharton.retrofit2.adapter.rxjava2.HttpException
-import com.squareup.moshi.Moshi
 import eu.the4thfloor.msync.BuildConfig
 import eu.the4thfloor.msync.R
 import eu.the4thfloor.msync.api.MeetupApi
 import eu.the4thfloor.msync.api.SecureApi
-import eu.the4thfloor.msync.api.models.AccessResponse
-import eu.the4thfloor.msync.api.models.CalendarResponse
-import eu.the4thfloor.msync.api.models.ErrorResponse
-import eu.the4thfloor.msync.api.models.Response
+import eu.the4thfloor.msync.api.models.Event
 import eu.the4thfloor.msync.api.models.Rsvp
 import eu.the4thfloor.msync.ui.CheckLoginStatusActivity
 import eu.the4thfloor.msync.ui.NotificationPermissionsActivity
-import eu.the4thfloor.msync.ui.Request
-import eu.the4thfloor.msync.ui.ResponseModel
 import eu.the4thfloor.msync.utils.addEvent
 import eu.the4thfloor.msync.utils.apply
 import eu.the4thfloor.msync.utils.checkSelfPermission
 import eu.the4thfloor.msync.utils.deleteEventsNotIn
 import eu.the4thfloor.msync.utils.getRefreshToken
-import io.reactivex.Flowable
-import io.reactivex.FlowableTransformer
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.processors.PublishProcessor
-import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.doFromSdk
 import org.jetbrains.anko.notificationManager
+import ru.gildor.coroutines.retrofit.Result
+import ru.gildor.coroutines.retrofit.awaitResult
 import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.*
@@ -62,7 +51,7 @@ import java.util.*
 private val FIELDS = "self,plain_text_description,link"
 private val ONLY = "id,name,time,utc_offset,duration,updated,venue,group,link,self,plain_text_description"
 
-private fun Context.saveEvents(response: CalendarResponse) {
+private fun Context.saveEvents(events: List<Event>) {
 
     val sync_yes = defaultSharedPreferences.getBoolean("pref_key_sync_event_yes", true)
     val sync_waitlist = defaultSharedPreferences.getBoolean("pref_key_sync_event_waitlist", true)
@@ -70,26 +59,15 @@ private fun Context.saveEvents(response: CalendarResponse) {
     val sync_no = defaultSharedPreferences.getBoolean("pref_key_sync_event_no", false)
     val ids = mutableListOf<Long>()
 
-    response.events
-        .forEach { event ->
-            when (event.self?.rsvp?.response ?: Rsvp.notanswered) {
-                Rsvp.yes -> {
-                    if (sync_yes) addEvent(event) else null
-                }
-                Rsvp.yes_pending_payment -> {
-                    if (sync_yes) addEvent(event) else null
-                }
-                Rsvp.no -> {
-                    if (sync_no) addEvent(event) else null
-                }
-                Rsvp.waitlist -> {
-                    if (sync_waitlist) addEvent(event) else null
-                }
-                Rsvp.notanswered -> {
-                    if (sync_unanswered) addEvent(event) else null
-                }
-            }?.let { ids.add(it) }
-        }
+    events.forEach { event ->
+        when (event.self.rsvp?.response ?: Rsvp.notanswered) {
+            Rsvp.yes                 -> if (sync_yes) addEvent(event) else null
+            Rsvp.yes_pending_payment -> if (sync_yes) addEvent(event) else null
+            Rsvp.no                  -> if (sync_no) addEvent(event) else null
+            Rsvp.waitlist            -> if (sync_waitlist) addEvent(event) else null
+            Rsvp.notanswered         -> if (sync_unanswered) addEvent(event) else null
+        }?.let { ids.add(it) }
+    }
     deleteEventsNotIn(ids)
 }
 
@@ -135,7 +113,6 @@ private fun Context.showPermissionsNotification() {
 
 fun sync(secureApi: SecureApi,
          meetupApi: MeetupApi,
-         disposables: CompositeDisposable,
          context: Context,
          finish: () -> Unit) {
 
@@ -146,8 +123,7 @@ fun sync(secureApi: SecureApi,
     }
 
     doFromSdk(Build.VERSION_CODES.M, {
-        if (context.checkSelfPermission(Manifest.permission.READ_CALENDAR,
-                                        Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+        if (context.checkSelfPermission(Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
             context.showPermissionsNotification()
             return
         }
@@ -155,119 +131,49 @@ fun sync(secureApi: SecureApi,
 
     context.defaultSharedPreferences.apply("pref_key_last_sync" to context.getString(R.string.syncing_now))
 
-    val moshi = Moshi.Builder().build().adapter(ErrorResponse::class.java)
-    val request = PublishProcessor.create<Request>()
-
     fun done() {
-
         val sdf = SimpleDateFormat.getDateTimeInstance().format(Date())
         context.defaultSharedPreferences.apply("pref_key_last_sync" to context.getString(R.string.last_synced, sdf))
         finish()
     }
 
-    fun handleResponse(response: AccessResponse) {
-        request.onNext(Request.Calendar(response.access_token!!))
-    }
-
-    fun handleResponse(response: CalendarResponse) {
-        launch(CommonPool) {
-            kotlin.run { context.saveEvents(response) }
-            launch(UI) { done() }
+    loadToken(secureApi, refreshToken) { accessToken ->
+        loadCalendar(meetupApi, accessToken) { events ->
+            launch(CommonPool) {
+                kotlin.run { context.saveEvents(events) }
+                launch(UI) { done() }
+            }
         }
     }
+}
 
-    val accessTransformer =
-        { flowable: Flowable<Request.Access> ->
-            flowable
-                .flatMap { access ->
-                    secureApi
-                        .access(mapOf("client_id" to BuildConfig.MEETUP_OAUTH_KEY,
-                                      "client_secret" to BuildConfig.MEETUP_OAUTH_SECRET,
-                                      "refresh_token" to access.code,
-                                      "grant_type" to "refresh_token"))
-                        .map { response -> ResponseModel.success(response) }
-                        .onErrorReturn { t ->
-                            ResponseModel.failure(if (t is HttpException) {
-                                                      t.response().errorBody()?.let {
-                                                          moshi.fromJson(it.string())
-                                                      } ?: ErrorResponse().apply {
-                                                          error = t.message
-                                                      }
-                                                  } else {
-                                                      ErrorResponse().apply {
-                                                          error = t.message
-                                                      }
-                                                  })
-                        }
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .startWith(ResponseModel.inProgress())
-                }
+private fun loadToken(secureApi: SecureApi, refreshToken: String, handler: (accessToken: String) -> Unit) {
+    Timber.i("refreshToken: %s", refreshToken)
+    launch(CommonPool) {
+        val result = secureApi.access(mapOf("client_id" to BuildConfig.MEETUP_OAUTH_KEY,
+                                            "client_secret" to BuildConfig.MEETUP_OAUTH_SECRET,
+                                            "refresh_token" to refreshToken,
+                                            "grant_type" to "refresh_token")).awaitResult()
+        launch(UI) {
+            when (result) {
+                is Result.Ok        -> handler(result.value.access_token)
+                is Result.Error     -> Timber.e(result.exception, "failed to load 'secureApi.access' - code: ${result.exception.code()}")
+                is Result.Exception -> Timber.e(result.exception, "Something broken")
+            }
         }
-
-    val eventsTransformer =
-        { flowable: Flowable<Request.Calendar> ->
-            flowable
-                .flatMap { event ->
-                    meetupApi.calendar("Bearer ${event.accessToken}", FIELDS, ONLY)
-                        .map { response ->
-                            ResponseModel.success(CalendarResponse(response))
-                        }
-                        .onErrorReturn { t ->
-                            ResponseModel.failure(if (t is HttpException) {
-                                                      t.response().errorBody()?.let {
-                                                          moshi.fromJson(it.string())
-                                                      }?: ErrorResponse().apply {
-                                                          error = t.message
-                                                      }
-                                                  } else {
-                                                      ErrorResponse().apply {
-                                                          error = t.message
-                                                      }
-                                                  })
-                        }
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .startWith(ResponseModel.inProgress())
-                }
-        }
-
-    val requestTransformer = FlowableTransformer<Request, ResponseModel<Response>> { flowable ->
-        flowable
-            .publish({ shared ->
-                         Flowable.merge(
-                             shared.ofType(Request.Calendar::class.java).compose(eventsTransformer),
-                             shared.ofType(Request.Access::class.java).compose(accessTransformer))
-                     })
     }
+}
 
-    disposables
-        .add(request
-                 .compose(requestTransformer)
-                 .subscribe({ (inProgress, success, response, error) ->
-                                if (!inProgress) {
-                                    if (success && response != null) {
-                                        when (response) {
-                                            is AccessResponse   -> {
-                                                Timber.i("success %s", response.access_token)
-                                                handleResponse(response)
-                                            }
-                                            is CalendarResponse -> {
-                                                Timber.i("events %s", response.events)
-                                                handleResponse(response)
-                                            }
-                                        }
-                                    } else {
-                                        Timber.e("!success %s", error)
-                                        done()
-                                    }
-                                }
-                            },
-                            { error ->
-                                Timber.e(error, "failed to access api")
-                                done()
-                            }))
-
-    // start signal
-    request.onNext(Request.Access(refreshToken))
+private fun loadCalendar(meetupApi: MeetupApi, accessToken: String, handler: (events: List<Event>) -> Unit) {
+    Timber.i("accessToken: %s", accessToken)
+    launch(CommonPool) {
+        val result = meetupApi.calendar("Bearer $accessToken", FIELDS, ONLY).awaitResult()
+        launch(UI) {
+            when (result) {
+                is Result.Ok        -> handler(result.value)
+                is Result.Error     -> Timber.e(result.exception, "failed to load 'meetupApi.calendar' - code: ${result.exception.code()}")
+                is Result.Exception -> Timber.e(result.exception, "Something broken")
+            }
+        }
+    }
 }

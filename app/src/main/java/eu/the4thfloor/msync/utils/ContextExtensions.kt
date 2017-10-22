@@ -22,8 +22,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.support.v4.content.ContextCompat
 import eu.the4thfloor.msync.BuildConfig
-import io.reactivex.BackpressureStrategy
-import io.reactivex.Flowable
 import org.jetbrains.anko.accountManager
 import eu.the4thfloor.msync.sync.lollipop.createSyncJobs as createSyncJobsLollipop
 import eu.the4thfloor.msync.sync.prelollipop.createSyncJobs as createSyncJobsPreLollipop
@@ -36,13 +34,11 @@ inline fun doFromSdk(version: Int, f: () -> Unit, other: () -> Unit) {
         other()
 }
 
-
 fun Context.checkSelfPermission(vararg permissions: String): Int =
     if (permissions.any { ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_DENIED })
         PackageManager.PERMISSION_DENIED
     else
         PackageManager.PERMISSION_GRANTED
-
 
 fun Context.hasAccount(): Boolean =
     getAccount() != null
@@ -53,19 +49,11 @@ fun Context.getAccount(): Account? =
 fun Context.getRefreshToken(): String? =
     getAccount()?.let { accountManager.getPassword(it) }
 
-fun Context.createAccount(accountName: String, refreshToken: String): Flowable<Account> =
-    Flowable.create({ e ->
-                        var account: Account? = getAccount()
-
-                        if (account == null) {
-                            account = Account(accountName, BuildConfig.ACCOUNT_TYPE)
-                            accountManager.addAccountExplicitly(account, null, null)
-                            accountManager.setPassword(account, refreshToken)
-                        }
-
-                        e.onNext(account)
-                        e.onComplete()
-                    }, BackpressureStrategy.LATEST)
+fun Context.createAccount(accountName: String, refreshToken: String): Account =
+    getAccount() ?: Account(accountName, BuildConfig.ACCOUNT_TYPE).apply {
+        accountManager.addAccountExplicitly(this, null, null)
+        accountManager.setPassword(this, refreshToken)
+    }
 
 fun Context.deleteAccount() =
     doFromSdk(Build.VERSION_CODES.LOLLIPOP_MR1,

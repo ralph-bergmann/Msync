@@ -16,7 +16,6 @@
 
 package eu.the4thfloor.msync.di
 
-import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
@@ -44,7 +43,6 @@ class NetworkModule {
         return Retrofit.Builder()
             .baseUrl(SECURE_BASE_URL)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
-            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .client(client)
             .build()
             .create(SecureApi::class.java)
@@ -57,7 +55,6 @@ class NetworkModule {
         return Retrofit.Builder()
             .baseUrl(API_BASE_URL)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
-            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .client(client)
             .build()
             .create(MeetupApi::class.java)

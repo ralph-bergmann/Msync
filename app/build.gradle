@@ -143,6 +143,8 @@ configurations.all {
     resolutionStrategy.eachDependency { DependencyResolveDetails details ->
         if (details.requested.group == 'com.android.support') {
             details.useVersion "${libs.support}"
+        } else if (details.requested.group == 'com.google.firebase') {
+            details.useVersion "${libs.firebase}"
         }
     }
 }
@@ -173,16 +175,14 @@ dependencies {
     debugImplementation "com.facebook.stetho:stetho:${libs.stetho}"
     debugImplementation "com.facebook.stetho:stetho-okhttp3:${libs.stetho}"
 
-    // rx
-    implementation "io.reactivex.rxjava2:rxjava:${libs.rxjava}"
-    implementation "io.reactivex.rxjava2:rxandroid:${libs.rxandroid}"
-
     // retrofit
     implementation "com.squareup.retrofit2:retrofit:${libs.retrofit}"
     implementation "com.squareup.retrofit2:converter-moshi:${libs.retrofit}"
-    implementation "com.jakewharton.retrofit:retrofit2-rxjava2-adapter:${libs.retrofit_rxjava2_adapter}"
     implementation "com.squareup.okhttp3:okhttp:${libs.okhttp}"
     debugImplementation "com.squareup.okhttp3:logging-interceptor:${libs.okhttp}"
+
+    // kotlin-coroutines-retrofit
+    implementation "ru.gildor.coroutines:kotlin-coroutines-retrofit:${libs.kotlin_coroutines_retrofit}"
 
     // leakcanary
     debugImplementation "com.squareup.leakcanary:leakcanary-android:${libs.leakcanary}"
@@ -223,4 +223,4 @@ project.afterEvaluate {
 }
 
 // ADD THIS AT THE BOTTOM
-//apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.gms.google-services'
