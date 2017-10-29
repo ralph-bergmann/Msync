@@ -22,8 +22,6 @@ import android.provider.CalendarContract.Attendees.ATTENDEE_STATUS_INVITED
 import android.provider.CalendarContract.Attendees.ATTENDEE_STATUS_TENTATIVE
 
 
-open class Response
-
 /**
  * {
  * ... "access_token":"ACCESS_TOKEN_TO_STORE",
@@ -32,15 +30,10 @@ open class Response
  * ... "refresh_token":"TOKEN_USED_TO_REFRESH_AUTHORIZATION"
  * }
  */
-class AccessResponse : Response() {
-    var access_token: String? = null
-    var token_type: String? = null
-    var expires_in: Long? = null
-    var refresh_token: String? = null
-
-    override fun toString(): String =
-        "AccessResponse(access_token=$access_token, token_type=$token_type, expires_in=$expires_in, refresh_token=$refresh_token)"
-}
+data class AccessResponse(val access_token: String,
+                          val token_type: String,
+                          val expires_in: Long,
+                          val refresh_token: String)
 
 /**
  * {
@@ -48,14 +41,10 @@ class AccessResponse : Response() {
  * ... "name": "Bobby Tables"
  * }
  */
-class SelfResponse : Response() {
-    var id: Long? = null
-    var name: String? = null
+data class SelfResponse(val id: Long,
+                        val name: String)
 
-    override fun toString(): String = "SelfResponse(id=$id, name=$name)"
-}
-
-class CalendarResponse(val events: List<Event>) : Response()
+data class CalendarResponse(val events: List<Event>)
 
 /**
  * [
@@ -103,52 +92,32 @@ class CalendarResponse(val events: List<Event>) : Response()
  * ... }
  * ]
  */
-class Event {
-    var id: String? = null
-    var name: String? = null
-    var plain_text_description: String? = null
-    var link: String? = null
-    var time: Long? = null
-    var utc_offset: Int? = null
-    var duration: Long? = null
-    var updated: Long? = null
-    var venue: EventVenue? = null
-    var group: EventGroup? = null
-    var self: EventSelf? = null
+data class Event(val id: String,
+                 val name: String,
+                 val plain_text_description: String,
+                 val link: String,
+                 val time: Long,
+                 val utc_offset: Int,
+                 val duration: Long?,
+                 val updated: Long,
+                 val venue: EventVenue,
+                 val group: EventGroup,
+                 val self: EventSelf)
 
-    override fun toString(): String = "Event(id=$id, name=$name, self=$self)"
-}
+data class EventVenue(val id: String,
+                      val name: String,
+                      val address_1: String,
+                      val address_2: String?,
+                      val address_3: String?,
+                      val city: String,
+                      val localized_country_name: String)
 
-class EventVenue {
-    var id: String? = null
-    var name: String? = null
-    var address_1: String? = null
-    var address_2: String? = null
-    var address_3: String? = null
-    var city: String? = null
-    var localized_country_name: String? = null
+data class EventGroup(val id: String,
+                      val name: String)
 
-    override fun toString(): String = "EventVenue(id=$id, name=$name)"
-}
+data class EventSelf(var rsvp: EventRsvp?)
 
-class EventGroup {
-    var id: String? = null
-    var name: String? = null
-
-    override fun toString(): String = "EventGroup(id=$id, name=$name)"
-}
-
-class EventSelf {
-    var rsvp: EventRsvp? = null
-
-    override fun toString(): String = "EventSelf(rsvp=$rsvp)"
-}
-
-class EventRsvp {
-    var response: Rsvp? = null
-
-    override fun toString(): String = "EventRsvp(response=$response)"
-}
+data class EventRsvp(var response: Rsvp)
 
 enum class Rsvp(val value: Int) {
     yes(ATTENDEE_STATUS_ACCEPTED),
@@ -156,20 +125,4 @@ enum class Rsvp(val value: Int) {
     no(ATTENDEE_STATUS_DECLINED),
     waitlist(ATTENDEE_STATUS_TENTATIVE),
     notanswered(ATTENDEE_STATUS_INVITED)
-}
-
-class CreateAccountResponse() : Response()
-
-/**
- * {
- * ... "error_description": "Invalid code",
- * ... "error": "invalid_grant"
- * }
- */
-class ErrorResponse {
-    var error_description: String? = null
-    var error: String? = null
-
-    override fun toString(): String =
-        "ErrorResponse(error_description=$error_description, error=$error)"
 }

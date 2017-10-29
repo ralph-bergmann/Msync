@@ -49,11 +49,6 @@
 -dontwarn org.jetbrains.anko.**
 
 
-# rx
--dontwarn rx.**
--keep class rx.internal.util.unsafe.** { *; }
-
-
 # moshi
 -keep class com.squareup.moshi.** { *; }
 -keep interface com.squareup.moshi.** { *; }

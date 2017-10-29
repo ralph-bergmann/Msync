@@ -4,35 +4,33 @@ buildscript {
 
     ext.configuration = [
         package          : "eu.the4thfloor.msync",
-        buildToolsVersion: '26.0.1',
+        buildToolsVersion: '27.0.0',
         minSdk           : 19,
-        targetSdk        : 26,
-        compileVersion   : 26,
+        targetSdk        : 27,
+        compileVersion   : 27,
         version_code     : 'git rev-list master --first-parent --count'.execute([], project.rootDir).text.trim().toInteger(),
-        version_name     : "v1.0.10",
+        version_name     : "v1.0.11",
         gitSha           : "git rev-parse --short HEAD".execute([], project.rootDir).text.trim(),
         buildTime        : new Date().format("yyyy-MM-dd"),
         hasKeyfile       : file('./keystore/keystore.properties').exists(),
     ]
 
     ext.libs = [
-        anko                    : "0.10.1",
-        colorpicker             : "1.0.3",
-        dagger2                 : '2.11',
-        firebase                : "11.2.2",
-        firebase_jobdispatcher  : '0.8.2',
-        jsr305                  : "3.0.1",
-        kotlin                  : "1.2.0-beta-31",
-        kotlin_coroutines       : "0.19",
-        leakcanary              : "1.5.4",
-        okhttp                  : "3.9.0",
-        retrofit                : "2.3.0",
-        retrofit_rxjava2_adapter: "1.0.0",
-        rxandroid               : "2.0.1",
-        rxjava                  : "2.1.4",
-        stetho                  : "1.5.0",
-        support                 : "26.1.0",
-        timber                  : "4.5.1",
+        anko                      : "0.10.2",
+        colorpicker               : "1.0.3",
+        dagger2                   : '2.12',
+        firebase                  : "11.4.2",
+        firebase_jobdispatcher    : '0.8.4',
+        jsr305                    : "3.0.1",
+        kotlin                    : "1.2.0-beta-88",
+        kotlin_coroutines         : "0.20-alpha-8",
+        kotlin_coroutines_retrofit: "0.8.2",
+        leakcanary                : "1.5.4",
+        okhttp                    : "3.9.0",
+        retrofit                  : "2.3.0",
+        stetho                    : "1.5.0",
+        support                   : "27.0.0",
+        timber                    : "4.5.1",
     ]
 
     repositories {
@@ -44,7 +42,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.0-beta6'
+        classpath 'com.android.tools.build:gradle:3.0.0'
         classpath 'com.google.gms:google-services:3.0.0'
         classpath('com.google.firebase:firebase-plugins:1.1.0-alpha1') {
             exclude group: 'com.google.guava', module: 'guava-jdk5'

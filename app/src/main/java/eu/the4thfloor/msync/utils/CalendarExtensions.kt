@@ -46,14 +46,14 @@ fun Context.getCalendarID(): Long? {
                               arrayOf(account.name, account.type),
                               null)
 
-    if (calendarCursor.count <= 0) {
+    return if (calendarCursor.count <= 0) {
         calendarCursor.close()
-        return null
+        null
     } else {
         calendarCursor.moveToFirst()
         val id = calendarCursor.getLong(calendarCursor.getColumnIndex(Calendars._ID))
         calendarCursor.close()
-        return id
+        id
     }
 }
 
@@ -140,23 +140,23 @@ fun Context.addEvent(event: Event): Long? {
 
     cursor.moveToFirst()
     val id = cursor.getLong(cursor.getColumnIndex(Events._ID))
-    val rsvp_status = cursor.getInt(cursor.getColumnIndex(Events.SELF_ATTENDEE_STATUS))
-    val updated_time = cursor.getLong(cursor.getColumnIndex(Events.SYNC_DATA1))
+    val rsvpStatus = cursor.getInt(cursor.getColumnIndex(Events.SELF_ATTENDEE_STATUS))
+    val updatedTime = cursor.getLong(cursor.getColumnIndex(Events.SYNC_DATA1))
     val deleted = cursor.getInt(cursor.getColumnIndex(Events.DELETED))
     cursor.close()
 
 
-    if (updated_time != event.updated || deleted == 1) {
+    if (updatedTime != event.updated || deleted == 1) {
         Timber.v("event %s changed -> update", event.name)
         updateEvent(account, id, contentValues(calendarId, event))
     }
 
 
-    event.self?.rsvp?.response?.let { rsvp ->
-        if (rsvp_status != rsvp.value) {
+    event.self.rsvp?.response?.let { rsvp ->
+        if (rsvpStatus != rsvp.value) {
             Timber.v("event %s rsvp changed -> update from %d to %d",
                      event.name,
-                     rsvp_status,
+                     rsvpStatus,
                      rsvp.value)
             val values = ContentValues()
             values.put(Attendees.ATTENDEE_STATUS, rsvp.value)
@@ -186,44 +186,30 @@ private fun contentValues(calendarId: Long,
     values.put(Events.SYNC_DATA1, event.updated)
     values.put(Events.DELETED, 0)
 
-    values.put(Events.DTSTART, event.time!!)
-    values.put(Events.DTEND, event.time!! + (event.duration ?: HOURS.toMillis(3)))
+    values.put(Events.DTSTART, event.time)
+    values.put(Events.DTEND, event.time + (event.duration ?: HOURS.toMillis(3)))
+    values.put(Events.EVENT_TIMEZONE, "UTC")
 
-    event.utc_offset?.let {
-        values.put(Events.EVENT_TIMEZONE, Time.getCurrentTimezone())
-
-        // TODO
-        // values.put(EVENT_TIMEZONE, TimeZone.getAvailableIDs(it).firstOrNull() ?: Time.getCurrentTimezone())
-    }
-
-    values.put(Events.TITLE, event.name?.trim() ?: "")
+    values.put(Events.TITLE, event.name.trim())
     values.put(Events.DESCRIPTION, StringBuilder().apply {
-        event.plain_text_description?.let {
-            append(it.trim())
-        }
-        event.link?.let {
-            append("\n\nDetails: ${it.trim()}")
-        }
+        append(event.plain_text_description.trim())
+        append("\n\nDetails: ${event.link.trim()}")
     }.toString())
 
-    event.venue?.let { venue ->
-        values.put(Events.EVENT_LOCATION, mutableListOf<String>().apply {
-            venue.name?.let { add(it.trim()) }
-            venue.address_1?.let { add(it.trim()) }
-            venue.address_2?.let { add(it.trim()) }
-            venue.address_3?.let { add(it.trim()) }
-            venue.city?.let { add(it.trim()) }
-            venue.localized_country_name?.let { add(it.trim()) }
-        }.joinToString(", "))
-    }
+    values.put(Events.EVENT_LOCATION, mutableListOf<String>().apply {
+        add(event.venue.name.trim())
+        add(event.venue.address_1.trim())
+        event.venue.address_2?.let { add(it.trim()) }
+        event.venue.address_3?.let { add(it.trim()) }
+        add(event.venue.city.trim())
+        add(event.venue.localized_country_name.trim())
+    }.joinToString(", "))
 
-    event.group?.let { group ->
-        values.put(Events.ORGANIZER, group.name)
-    }
+    values.put(Events.ORGANIZER, event.group.name)
 
     // SELF_ATTENDEE_STATUS kann nur bei insert, nicht jedoch bei update gesetzt werden
     if (forInsert) {
-        event.self?.rsvp?.response?.let { rsvp ->
+        event.self.rsvp?.response?.let { rsvp ->
             values.put(Events.SELF_ATTENDEE_STATUS, rsvp.value)
         }
     }
@@ -236,9 +222,8 @@ private fun contentValues(calendarId: Long,
     return values
 }
 
-private fun Context.insertEvent(account: Account, values: ContentValues): Long {
-    return ContentUris.parseId(contentResolver.insert(contentUri(Events.CONTENT_URI, account), values))
-}
+private fun Context.insertEvent(account: Account, values: ContentValues): Long =
+    ContentUris.parseId(contentResolver.insert(contentUri(Events.CONTENT_URI, account), values))
 
 private fun Context.updateEvent(account: Account, id: Long, values: ContentValues): Int {
     return contentResolver.update(contentUri(Events.CONTENT_URI, account),
@@ -255,9 +240,8 @@ private fun Context.updateSelfAttendeeStatus(account: Account, id: Long, values:
 }
 
 
-private fun contentUri(uri: Uri, account: Account): Uri {
-    return uri.buildUpon()
+private fun contentUri(uri: Uri, account: Account): Uri =
+    uri.buildUpon()
         .appendQueryParameter(CALLER_IS_SYNCADAPTER, "true")
         .appendQueryParameter(Calendars.ACCOUNT_NAME, account.name)
         .appendQueryParameter(Calendars.ACCOUNT_TYPE, account.type).build()
-}
