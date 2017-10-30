@@ -211,16 +211,14 @@ task archiveRelease(type: Copy) {
 
 project.afterEvaluate {
 
-    dependencyUpdates.dependsOn clean
     assembleRelease.dependsOn clean
+    assembleRelease.finalizedBy archiveRelease
 
     def publishApkRelease = project.tasks.getByName("publishApkRelease")
     publishApkRelease.dependsOn assembleRelease
-
-    archiveRelease.shouldRunAfter publishApkRelease
 
     release.dependsOn publishApkRelease
 }
 
 // ADD THIS AT THE BOTTOM
-apply plugin: 'com.google.gms.google-services'
+//apply plugin: 'com.google.gms.google-services'

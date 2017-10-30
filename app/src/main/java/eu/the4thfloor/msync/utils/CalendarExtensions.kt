@@ -192,18 +192,20 @@ private fun contentValues(calendarId: Long,
 
     values.put(Events.TITLE, event.name.trim())
     values.put(Events.DESCRIPTION, StringBuilder().apply {
-        append(event.plain_text_description.trim())
+        event.plain_text_description?.let { append(it.trim()) }
         append("\n\nDetails: ${event.link.trim()}")
     }.toString())
 
-    values.put(Events.EVENT_LOCATION, mutableListOf<String>().apply {
-        add(event.venue.name.trim())
-        add(event.venue.address_1.trim())
-        event.venue.address_2?.let { add(it.trim()) }
-        event.venue.address_3?.let { add(it.trim()) }
-        add(event.venue.city.trim())
-        add(event.venue.localized_country_name.trim())
-    }.joinToString(", "))
+    event.venue?.let { venue ->
+        values.put(Events.EVENT_LOCATION, mutableListOf<String>().apply {
+            add(venue.name.trim())
+            add(venue.address_1.trim())
+            venue.address_2?.let { add(it.trim()) }
+            venue.address_3?.let { add(it.trim()) }
+            add(venue.city.trim())
+            add(venue.localized_country_name.trim())
+        }.joinToString(", "))
+    }
 
     values.put(Events.ORGANIZER, event.group.name)
 

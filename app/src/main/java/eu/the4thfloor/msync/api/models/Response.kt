@@ -94,13 +94,13 @@ data class CalendarResponse(val events: List<Event>)
  */
 data class Event(val id: String,
                  val name: String,
-                 val plain_text_description: String,
+                 val plain_text_description: String?,
                  val link: String,
                  val time: Long,
                  val utc_offset: Int,
                  val duration: Long?,
                  val updated: Long,
-                 val venue: EventVenue,
+                 val venue: EventVenue?,
                  val group: EventGroup,
                  val self: EventSelf)
 

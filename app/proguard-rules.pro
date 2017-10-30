@@ -29,13 +29,9 @@
 # square okhttp3 / okio
 -dontwarn okhttp3.**
 -dontwarn okio.**
--keep class okhttp3.** { *; }
--keep class sun.misc.Unsafe { *; }
--keep interface okhttp3.** { *; }
 
 # square retrofit2
 -dontwarn retrofit2.**
--keep class retrofit2.** { *; }
 -keepclasseswithmembers class * {
     @retrofit2.http.* <methods>;
 }
@@ -50,8 +46,6 @@
 
 
 # moshi
--keep class com.squareup.moshi.** { *; }
--keep interface com.squareup.moshi.** { *; }
 -keep class eu.the4thfloor.msync.api.models.** { *; }
 
 
