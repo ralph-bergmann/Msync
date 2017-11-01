@@ -130,7 +130,7 @@ fun Context.sync(secureApi: SecureApi, meetupApi: MeetupApi, finish: () -> Unit)
         }
     })
 
-    defaultSharedPreferences.apply("pref_key_last_sync" to context.getString(R.string.syncing_now))
+    defaultSharedPreferences.apply("pref_key_last_sync" to getString(R.string.syncing_now))
 
     fun done() {
         val sdf = SimpleDateFormat.getDateTimeInstance().format(Date())
