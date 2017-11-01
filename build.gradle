@@ -9,7 +9,7 @@ buildscript {
         targetSdk        : 27,
         compileVersion   : 27,
         version_code     : 'git rev-list master --first-parent --count'.execute([], project.rootDir).text.trim().toInteger(),
-        version_name     : "v1.0.12",
+        version_name     : "v1.0.13",
         gitSha           : "git rev-parse --short HEAD".execute([], project.rootDir).text.trim(),
         buildTime        : new Date().format("yyyy-MM-dd"),
         hasKeyfile       : file('./keystore/keystore.properties').exists(),
@@ -22,7 +22,7 @@ buildscript {
         firebase                  : "11.4.2",
         firebase_jobdispatcher    : '0.8.4',
         jsr305                    : "3.0.1",
-        kotlin                    : "1.2.0-beta-88",
+        kotlin                    : "1.2.0-rc-39",
         kotlin_coroutines         : "0.20-alpha-8",
         kotlin_coroutines_retrofit: "0.8.2",
         leakcanary                : "1.5.4",
@@ -30,26 +30,19 @@ buildscript {
         retrofit                  : "2.3.0",
         stetho                    : "1.5.0",
         support                   : "27.0.0",
-        timber                    : "4.5.1",
+        timber                    : "4.6.0",
     ]
 
     repositories {
         jcenter()
         mavenCentral()
-        maven { url 'https://maven.google.com' }
-        maven { url "https://plugins.gradle.org/m2/" }
+        google()
         maven { url 'http://dl.bintray.com/kotlin/kotlin-eap-1.2' }
     }
 
     dependencies {
         classpath 'com.android.tools.build:gradle:3.0.0'
-        classpath 'com.google.gms:google-services:3.0.0'
-        classpath('com.google.firebase:firebase-plugins:1.1.0-alpha1') {
-            exclude group: 'com.google.guava', module: 'guava-jdk5'
-        }
         classpath 'com.github.triplet.gradle:play-publisher:1.2.0'
-        classpath 'com.github.ben-manes:gradle-versions-plugin:0.15.0'
-        classpath "net.ltgt.gradle:gradle-errorprone-plugin:0.0.10"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${rootProject.ext.libs.kotlin}"
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -57,11 +50,16 @@ buildscript {
     }
 }
 
+plugins {
+    id "com.github.ben-manes.versions" version "0.17.0"
+    id "net.ltgt.errorprone" version "0.0.13"
+}
+
 allprojects {
     repositories {
         jcenter()
         mavenCentral()
-        maven { url 'https://maven.google.com' }
+        google()
         maven { url "https://jitpack.io" }
         maven { url 'http://dl.bintray.com/kotlin/kotlin-eap-1.2' }
     }

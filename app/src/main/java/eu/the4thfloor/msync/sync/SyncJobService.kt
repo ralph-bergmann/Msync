@@ -17,6 +17,7 @@
 package eu.the4thfloor.msync.sync
 
 import android.Manifest
+import android.accounts.Account
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -35,6 +36,8 @@ import eu.the4thfloor.msync.utils.addEvent
 import eu.the4thfloor.msync.utils.apply
 import eu.the4thfloor.msync.utils.checkSelfPermission
 import eu.the4thfloor.msync.utils.deleteEventsNotIn
+import eu.the4thfloor.msync.utils.getAccount
+import eu.the4thfloor.msync.utils.getCalendarID
 import eu.the4thfloor.msync.utils.getRefreshToken
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
@@ -51,7 +54,7 @@ import java.util.*
 private val FIELDS = "self,plain_text_description,link"
 private val ONLY = "id,name,time,utc_offset,duration,updated,venue,group,link,self,plain_text_description"
 
-private fun Context.saveEvents(events: List<Event>) {
+private fun Context.saveEvents(account: Account, calendarId: Long, events: List<Event>) {
 
     val sync_yes = defaultSharedPreferences.getBoolean("pref_key_sync_event_yes", true)
     val sync_waitlist = defaultSharedPreferences.getBoolean("pref_key_sync_event_waitlist", true)
@@ -60,12 +63,11 @@ private fun Context.saveEvents(events: List<Event>) {
     val ids = mutableListOf<Long>()
 
     events.forEach { event ->
-        when (event.self.rsvp?.response ?: Rsvp.notanswered) {
-            Rsvp.yes                 -> if (sync_yes) addEvent(event) else null
-            Rsvp.yes_pending_payment -> if (sync_yes) addEvent(event) else null
-            Rsvp.no                  -> if (sync_no) addEvent(event) else null
-            Rsvp.waitlist            -> if (sync_waitlist) addEvent(event) else null
-            Rsvp.notanswered         -> if (sync_unanswered) addEvent(event) else null
+        when (event.self.rsvp?.response) {
+            Rsvp.yes, Rsvp.yes_pending_payment -> if (sync_yes) addEvent(account, calendarId, event) else null
+            Rsvp.no                            -> if (sync_no) addEvent(account, calendarId, event) else null
+            Rsvp.waitlist                      -> if (sync_waitlist) addEvent(account, calendarId, event) else null
+            else                               -> if (sync_unanswered) addEvent(account, calendarId, event) else null
         }?.let { ids.add(it) }
     }
     deleteEventsNotIn(ids)
@@ -111,36 +113,35 @@ private fun Context.showPermissionsNotification() {
                     }.build())
 }
 
-fun sync(secureApi: SecureApi,
-         meetupApi: MeetupApi,
-         context: Context,
-         finish: () -> Unit) {
+fun Context.sync(secureApi: SecureApi, meetupApi: MeetupApi, finish: () -> Unit) {
 
-    val refreshToken = context.getRefreshToken()
-    if (refreshToken == null) {
-        context.showLoginNotification()
+    val account = getAccount()
+    val calendarId = getCalendarID()
+    val refreshToken = getRefreshToken()
+    if (account == null || calendarId == null || refreshToken == null) {
+        showLoginNotification()
         return
     }
 
     doFromSdk(Build.VERSION_CODES.M, {
-        if (context.checkSelfPermission(Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
-            context.showPermissionsNotification()
+        if (checkSelfPermission(Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+            showPermissionsNotification()
             return
         }
     })
 
-    context.defaultSharedPreferences.apply("pref_key_last_sync" to context.getString(R.string.syncing_now))
+    defaultSharedPreferences.apply("pref_key_last_sync" to context.getString(R.string.syncing_now))
 
     fun done() {
         val sdf = SimpleDateFormat.getDateTimeInstance().format(Date())
-        context.defaultSharedPreferences.apply("pref_key_last_sync" to context.getString(R.string.last_synced, sdf))
+        defaultSharedPreferences.apply("pref_key_last_sync" to getString(R.string.last_synced, sdf))
         finish()
     }
 
     loadToken(secureApi, refreshToken) { accessToken ->
         loadCalendar(meetupApi, accessToken) { events ->
             launch(CommonPool) {
-                kotlin.run { context.saveEvents(events) }
+                kotlin.run { saveEvents(account, calendarId, events) }
                 launch(UI) { done() }
             }
         }

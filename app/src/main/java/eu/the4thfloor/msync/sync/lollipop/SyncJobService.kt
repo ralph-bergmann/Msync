@@ -40,7 +40,7 @@ class SyncJobService : JobService() {
     }
 
     override fun onStartJob(params: JobParameters): Boolean {
-        sync(secureApi, meetupApi, applicationContext) {
+        applicationContext.sync(secureApi, meetupApi) {
             jobFinished(params, false)
         }
         return true
