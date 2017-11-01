@@ -118,10 +118,7 @@ fun Context.updateCalendarColor() {
 /**
  * @return id of the entry in sqlite or null if something is broken
  */
-fun Context.addEvent(event: Event): Long? {
-
-    val account = getAccount() ?: return null
-    val calendarId = getCalendarID() ?: return null
+fun Context.addEvent(account: Account, calendarId: Long, event: Event): Long? {
 
     val cursor = contentResolver.query(contentUri(Events.CONTENT_URI, account),
                                        arrayOf(Events._ID,
@@ -132,13 +129,12 @@ fun Context.addEvent(event: Event): Long? {
                                        arrayOf(calendarId.toString(), event.id),
                                        null)
 
-    if (cursor.count == 0) {
+    if (!cursor.moveToFirst()) {
         cursor.close()
         Timber.v("event %s not found -> insert", event.name)
         return insertEvent(account, contentValues(calendarId, event, true))
     }
 
-    cursor.moveToFirst()
     val id = cursor.getLong(cursor.getColumnIndex(Events._ID))
     val rsvpStatus = cursor.getInt(cursor.getColumnIndex(Events.SELF_ATTENDEE_STATUS))
     val updatedTime = cursor.getLong(cursor.getColumnIndex(Events.SYNC_DATA1))
