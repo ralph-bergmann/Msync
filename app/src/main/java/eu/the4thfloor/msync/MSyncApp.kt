@@ -20,11 +20,18 @@ import android.app.Application
 import android.os.StrictMode
 import com.squareup.leakcanary.LeakCanary
 import com.squareup.leakcanary.RefWatcher
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
+import eu.the4thfloor.msync.api.models.Event
+import eu.the4thfloor.msync.api.models.Rsvp
 import eu.the4thfloor.msync.di.MainComponent
 import eu.the4thfloor.msync.di.MainModule
 import eu.the4thfloor.msync.utils.DebugTree
 import eu.the4thfloor.msync.utils.enableStetho
+import okio.BufferedSource
+import okio.Okio
 import timber.log.Timber
+import java.util.*
 
 
 class MSyncApp : Application() {
@@ -60,6 +67,23 @@ class MSyncApp : Application() {
 
             enableStetho()
         }
+
+        test()
+    }
+
+    private fun test() {
+        val input = assets.open("calendar.json")
+        val buffer = Okio.buffer(Okio.source(input))
+        val list = foo(buffer)
+        list
+            .filter { item -> item.self.rsvp?.response == Rsvp.yes }
+            .forEach { item -> Timber.i("${item.name} - ${Date(item.time)}") }
+    }
+
+    private fun foo(buffer: BufferedSource): List<Event> {
+        val listMyData = Types.newParameterizedType(List::class.java, Event::class.java)
+        val adapter = Moshi.Builder().build().adapter<List<Event>>(listMyData)
+        return adapter.fromJson(buffer)
     }
 
     companion object {
