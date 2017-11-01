@@ -1,8 +1,5 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.google.firebase.firebase-crash'
-apply plugin: "net.ltgt.errorprone"
 apply plugin: 'com.github.triplet.play'
-apply plugin: 'com.github.ben-manes.versions'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
@@ -219,6 +216,3 @@ project.afterEvaluate {
 
     release.dependsOn publishApkRelease
 }
-
-// ADD THIS AT THE BOTTOM
-//apply plugin: 'com.google.gms.google-services'

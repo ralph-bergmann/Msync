@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/Msync.iml" filepath="$PROJECT_DIR$/Msync.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/msync.iml" filepath="$PROJECT_DIR$/msync.iml" />
     </modules>
   </component>
 </project>
