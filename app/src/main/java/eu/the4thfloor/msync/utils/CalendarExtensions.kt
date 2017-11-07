@@ -46,11 +46,10 @@ fun Context.getCalendarID(): Long? {
                               arrayOf(account.name, account.type),
                               null)
 
-    return if (calendarCursor.count <= 0) {
+    return if (!calendarCursor.moveToFirst()) {
         calendarCursor.close()
         null
     } else {
-        calendarCursor.moveToFirst()
         val id = calendarCursor.getLong(calendarCursor.getColumnIndex(Calendars._ID))
         calendarCursor.close()
         id
@@ -90,10 +89,9 @@ fun Context.updateCalendarName() {
     values.put(Calendars.NAME, calendarName)
     values.put(Calendars.CALENDAR_DISPLAY_NAME, calendarName)
 
-    val where = "${Calendars._ID} = ?"
     contentResolver.update(contentUri(Calendars.CONTENT_URI, account),
                            values,
-                           where,
+                           "${Calendars._ID} = ?",
                            arrayOf(id.toString()))
 }
 
@@ -107,10 +105,9 @@ fun Context.updateCalendarColor() {
     val values = ContentValues()
     values.put(Calendars.CALENDAR_COLOR, calendarColor)
 
-    val where = "${Calendars._ID} = ?"
     contentResolver.update(contentUri(Calendars.CONTENT_URI, account),
                            values,
-                           where,
+                           "${Calendars._ID} = ?",
                            arrayOf(id.toString()))
 }
 
@@ -131,8 +128,9 @@ fun Context.addEvent(account: Account, calendarId: Long, event: Event): Long? {
 
     if (!cursor.moveToFirst()) {
         cursor.close()
-        Timber.v("event %s not found -> insert", event.name)
-        return insertEvent(account, contentValues(calendarId, event, true))
+        val id = insertEvent(account, contentValues(calendarId, event, true))
+        Timber.v("event $event not found -> insert - id: $id")
+        return id
     }
 
     val id = cursor.getLong(cursor.getColumnIndex(Events._ID))
@@ -143,17 +141,14 @@ fun Context.addEvent(account: Account, calendarId: Long, event: Event): Long? {
 
 
     if (updatedTime != event.updated || deleted == 1) {
-        Timber.v("event %s changed -> update", event.name)
+        Timber.v("event $event changed -> update - id: $id")
         updateEvent(account, id, contentValues(calendarId, event))
     }
 
 
     event.self.rsvp?.response?.let { rsvp ->
         if (rsvpStatus != rsvp.value) {
-            Timber.v("event %s rsvp changed -> update from %d to %d",
-                     event.name,
-                     rsvpStatus,
-                     rsvp.value)
+            Timber.v("event $event rsvp changed -> update from $rsvpStatus to ${rsvp.value}")
             val values = ContentValues()
             values.put(Attendees.ATTENDEE_STATUS, rsvp.value)
             updateSelfAttendeeStatus(account, id, values)
@@ -226,14 +221,14 @@ private fun Context.insertEvent(account: Account, values: ContentValues): Long =
 private fun Context.updateEvent(account: Account, id: Long, values: ContentValues): Int {
     return contentResolver.update(contentUri(Events.CONTENT_URI, account),
                                   values,
-                                  Events._ID + " = ?",
+                                  "${Events._ID} = ?",
                                   arrayOf(id.toString()))
 }
 
 private fun Context.updateSelfAttendeeStatus(account: Account, id: Long, values: ContentValues) {
     contentResolver.update(contentUri(Attendees.CONTENT_URI, account),
                            values,
-                           Attendees.EVENT_ID + " = ?",
+                           "${Attendees.EVENT_ID} = ?",
                            arrayOf(id.toString()))
 }
 

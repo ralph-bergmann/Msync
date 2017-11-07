@@ -102,7 +102,10 @@ data class Event(val id: String,
                  val updated: Long,
                  val venue: EventVenue?,
                  val group: EventGroup,
-                 val self: EventSelf)
+                 val self: EventSelf) {
+
+    override fun toString(): String = "Event(id='$id', name='$name', response=${self.rsvp?.response})"
+}
 
 data class EventVenue(val id: String,
                       val name: String,
