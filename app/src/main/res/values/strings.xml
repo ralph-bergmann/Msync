@@ -49,6 +49,9 @@
     <string name="pref_header_account">Account</string>
     <string name="pref_title_logout">Logout</string>
 
+    <!-- debug -->
+    <string name="pref_header_debug">Debug</string>
+    <string name="pref_title_debug">Send debug infos</string>
 
     <!-- about -->
     <string name="pref_header_about">About</string>
