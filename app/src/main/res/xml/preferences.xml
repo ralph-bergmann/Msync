@@ -94,6 +94,20 @@
 
 
     <PreferenceCategory
+        android:title="@string/pref_header_debug">
+
+        <Preference
+            android:title="@string/pref_title_debug"
+            android:key="pref_key_debug">
+            <intent
+                android:action="@string/pref_action"
+                android:data="@string/pref_action_debug"/>
+        </Preference>
+
+    </PreferenceCategory>
+
+
+    <PreferenceCategory
         android:title="@string/pref_header_about">
 
         <Preference

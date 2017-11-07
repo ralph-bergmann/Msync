@@ -88,6 +88,7 @@ android {
         addConstant("pref_action_sync_now", actionScheme + "://SYNC_NOW")
         addConstant("pref_action_share", actionScheme + "://SHARE")
         addConstant("pref_action_logout", actionScheme + "://LOGOUT")
+        addConstant("pref_action_debug", actionScheme + "://DEBUG")
         addConstant("pref_action_github", actionScheme + "://GITHUB")
 
         addConstant("account_type", cfg.package + buildType.applicationIdSuffix)
@@ -131,7 +132,7 @@ android {
 }
 
 play {
-    track = 'beta' // 'production' or 'rollout' or 'beta' or 'alpha'
+    track = 'production' // 'production' or 'rollout' or 'beta' or 'alpha'
 //    userFraction = 1.0 // only necessary for 'rollout', in this case default is 0.1 (10% of the target)
     untrackOld = true // will untrack 'alpha' while upload to 'beta'
 }

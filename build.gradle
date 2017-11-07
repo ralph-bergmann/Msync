@@ -4,12 +4,12 @@ buildscript {
 
     ext.configuration = [
         package          : "eu.the4thfloor.msync",
-        buildToolsVersion: '27.0.0',
+        buildToolsVersion: '27.0.1',
         minSdk           : 19,
         targetSdk        : 27,
         compileVersion   : 27,
         version_code     : 'git rev-list master --first-parent --count'.execute([], project.rootDir).text.trim().toInteger(),
-        version_name     : "v1.0.14",
+        version_name     : "v1.0.15",
         gitSha           : "git rev-parse --short HEAD".execute([], project.rootDir).text.trim(),
         buildTime        : new Date().format("yyyy-MM-dd"),
         hasKeyfile       : file('./keystore/keystore.properties').exists(),
@@ -17,13 +17,13 @@ buildscript {
 
     ext.libs = [
         anko                      : "0.10.2",
-        colorpicker               : "1.0.3",
-        dagger2                   : '2.12',
+        colorpicker               : "1.0.4",
+        dagger2                   : '2.13',
         firebase                  : "11.4.2",
         firebase_jobdispatcher    : '0.8.4',
         jsr305                    : "3.0.1",
         kotlin                    : "1.2.0-rc-39",
-        kotlin_coroutines         : "0.20-alpha-8",
+        kotlin_coroutines         : "0.20-alpha-9",
         kotlin_coroutines_retrofit: "0.8.2",
         leakcanary                : "1.5.4",
         okhttp                    : "3.9.0",
