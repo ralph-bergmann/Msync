@@ -39,6 +39,7 @@
 
 # kotlin
 -dontwarn kotlin.**
+-dontwarn javax.annotation.**
 
 
 # anko
