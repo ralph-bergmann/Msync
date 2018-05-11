@@ -19,7 +19,7 @@ To remove your stored data delete this app. We don't have our backend server, so
 
 We never access your others calendar entries nor do we send them to third parties.
 
-Access Accounts: to store the access token (see above) at a secure place on your Android device.
+**Access Accounts:** to store the access token (see above) at a secure place on your Android device.
 
 We never access your others account entries nor do we send them to third parties.
 
