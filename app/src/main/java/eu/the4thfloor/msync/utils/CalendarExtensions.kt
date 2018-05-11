@@ -21,6 +21,7 @@ import android.accounts.Account
 import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
+import android.database.Cursor
 import android.net.Uri
 import android.provider.CalendarContract.Attendees
 import android.provider.CalendarContract.CALLER_IS_SYNCADAPTER
@@ -39,20 +40,22 @@ fun Context.getCalendarID(): Long? {
 
     val account = getAccount() ?: return null
 
-    val calendarCursor =
+    val calendarCursor: Cursor? =
         contentResolver.query(Calendars.CONTENT_URI,
                               arrayOf(Calendars._ID),
                               "${Calendars.ACCOUNT_NAME} = ? AND ${Calendars.ACCOUNT_TYPE} = ?",
                               arrayOf(account.name, account.type),
                               null)
 
-    return if (!calendarCursor.moveToFirst()) {
-        calendarCursor.close()
-        null
-    } else {
-        val id = calendarCursor.getLong(calendarCursor.getColumnIndex(Calendars._ID))
-        calendarCursor.close()
-        id
+    return calendarCursor?.let {
+        if (!it.moveToFirst()) {
+            calendarCursor.close()
+            null
+        } else {
+            val id = it.getLong(it.getColumnIndex(Calendars._ID))
+            it.close()
+            id
+        }
     }
 }
 
@@ -215,8 +218,8 @@ private fun contentValues(calendarId: Long,
     return values
 }
 
-private fun Context.insertEvent(account: Account, values: ContentValues): Long =
-    ContentUris.parseId(contentResolver.insert(contentUri(Events.CONTENT_URI, account), values))
+private fun Context.insertEvent(account: Account, values: ContentValues): Long? =
+    contentResolver.insert(contentUri(Events.CONTENT_URI, account), values)?.let { ContentUris.parseId(it) }
 
 private fun Context.updateEvent(account: Account, id: Long, values: ContentValues): Int {
     return contentResolver.update(contentUri(Events.CONTENT_URI, account),
