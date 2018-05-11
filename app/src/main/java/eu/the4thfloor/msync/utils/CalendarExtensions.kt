@@ -215,8 +215,8 @@ private fun contentValues(calendarId: Long,
     return values
 }
 
-private fun Context.insertEvent(account: Account, values: ContentValues): Long =
-    ContentUris.parseId(contentResolver.insert(contentUri(Events.CONTENT_URI, account), values))
+private fun Context.insertEvent(account: Account, values: ContentValues): Long? =
+    contentResolver.insert(contentUri(Events.CONTENT_URI, account), values)?.let { ContentUris.parseId(it) }
 
 private fun Context.updateEvent(account: Account, id: Long, values: ContentValues): Int {
     return contentResolver.update(contentUri(Events.CONTENT_URI, account),
