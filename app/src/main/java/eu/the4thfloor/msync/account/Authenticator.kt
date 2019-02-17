@@ -26,7 +26,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import eu.the4thfloor.msync.ui.LoginActivity
-import org.jetbrains.anko.bundleOf
+import androidx.core.os.bundleOf
 
 /*
  * Implement AbstractAccountAuthenticator and stub out all

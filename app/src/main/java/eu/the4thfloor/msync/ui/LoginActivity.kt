@@ -18,12 +18,13 @@ package eu.the4thfloor.msync.ui
 
 import android.Manifest
 import android.accounts.AccountAuthenticatorActivity
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.support.annotation.RequiresPermission
 import android.view.Window
+import androidx.annotation.RequiresPermission
 import eu.the4thfloor.msync.BuildConfig.MEETUP_OAUTH_KEY
 import eu.the4thfloor.msync.BuildConfig.MEETUP_OAUTH_REDIRECT_URI
 import eu.the4thfloor.msync.BuildConfig.MEETUP_OAUTH_SECRET
@@ -37,9 +38,9 @@ import eu.the4thfloor.msync.utils.createCalendar
 import eu.the4thfloor.msync.utils.createSyncJobs
 import eu.the4thfloor.msync.utils.doFromSdk
 import eu.the4thfloor.msync.utils.getCalendarID
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.startActivity
 import ru.gildor.coroutines.retrofit.Result
 import ru.gildor.coroutines.retrofit.awaitResult
@@ -67,8 +68,8 @@ class LoginActivity : AccountAuthenticatorActivity() {
     private fun handleIntent(intent: Intent) {
         intent.action?.let {
             if (it.equals(Intent.ACTION_VIEW, true)) {
-                intent.data.getQueryParameter("code")?.let {
-                    loadToken(it)
+                intent.data?.getQueryParameter("code")?.let { code ->
+                    loadToken(code)
                 }
             }
         }
@@ -76,13 +77,13 @@ class LoginActivity : AccountAuthenticatorActivity() {
 
     private fun loadToken(code: String) {
         Timber.i("code: %s", code)
-        launch(CommonPool) {
+        GlobalScope.launch {
             val result = secureApi.access(mapOf("client_id" to MEETUP_OAUTH_KEY,
                                                 "client_secret" to MEETUP_OAUTH_SECRET,
                                                 "redirect_uri" to MEETUP_OAUTH_REDIRECT_URI,
                                                 "code" to code,
                                                 "grant_type" to "authorization_code")).awaitResult()
-            launch(UI) {
+            GlobalScope.launch(Dispatchers.Main) {
                 when (result) {
                     is Result.Ok        -> loadSelf(result.value.access_token, result.value.refresh_token)
                     is Result.Error     -> Timber.e(result.exception, "failed to load 'secureApi.access' - code: ${result.exception.code()}")
@@ -94,9 +95,9 @@ class LoginActivity : AccountAuthenticatorActivity() {
 
     private fun loadSelf(accessToken: String, refreshToken: String) {
         Timber.i("accessToken: %s", accessToken)
-        launch(CommonPool) {
+        GlobalScope.launch {
             val result = meetupApi.self("Bearer $accessToken").awaitResult()
-            launch(UI) {
+            GlobalScope.launch(Dispatchers.Main) {
                 when (result) {
                     is Result.Ok        -> createAccountCalendarAndSyncJob(result.value.name, refreshToken)
                     is Result.Error     -> Timber.e(result.exception, "failed to load 'meetupApi.self' - code: ${result.exception.code()}")
@@ -126,6 +127,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
                   })
     }
 
+    @SuppressLint("MissingPermission")
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
@@ -143,7 +145,7 @@ class LoginActivity : AccountAuthenticatorActivity() {
         }
     }
 
-    @RequiresPermission(allOf = arrayOf(Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR))
+    @RequiresPermission(allOf = [Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR])
     private fun createCalendarIfNeeded() {
         if (getCalendarID() == null) {
             createCalendar()

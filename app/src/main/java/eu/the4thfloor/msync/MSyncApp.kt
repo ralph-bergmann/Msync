@@ -17,6 +17,9 @@
 package eu.the4thfloor.msync
 
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.os.Build
 import android.os.StrictMode
 import com.squareup.leakcanary.LeakCanary
 import com.squareup.leakcanary.RefWatcher
@@ -60,6 +63,23 @@ class MSyncApp : Application() {
 
             enableStetho()
         }
+
+        createNotificationChannel()
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Create the NotificationChannel
+            val name = getString(R.string.channel_name)
+            val descriptionText = getString(R.string.channel_description)
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val mChannel = NotificationChannel(CHANNEL_ID, name, importance)
+            mChannel.description = descriptionText
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(mChannel)
+        }
     }
 
     companion object {
@@ -70,5 +90,7 @@ class MSyncApp : Application() {
         val graph: MainComponent by lazy {
             MainComponent.Initializer.init(MainModule(instance!!))
         }
+
+        const val CHANNEL_ID = "Msync Notification Channel"
     }
 }

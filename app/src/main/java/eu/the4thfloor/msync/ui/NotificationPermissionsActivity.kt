@@ -19,7 +19,7 @@ package eu.the4thfloor.msync.ui
 import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
-import android.support.v4.app.ActivityCompat
+import androidx.core.app.ActivityCompat
 import eu.the4thfloor.msync.utils.checkSelfPermission
 import eu.the4thfloor.msync.utils.createSyncJobs
 

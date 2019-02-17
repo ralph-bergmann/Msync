@@ -20,7 +20,7 @@ package eu.the4thfloor.msync.sync.lollipop
 import android.app.job.JobParameters
 import android.app.job.JobService
 import android.os.Build
-import android.support.annotation.RequiresApi
+import androidx.annotation.RequiresApi
 import eu.the4thfloor.msync.MSyncApp
 import eu.the4thfloor.msync.api.MeetupApi
 import eu.the4thfloor.msync.api.SecureApi

@@ -23,8 +23,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
-import android.support.v4.app.NotificationCompat
+import androidx.core.app.NotificationCompat
 import eu.the4thfloor.msync.BuildConfig
+import eu.the4thfloor.msync.MSyncApp.Companion.CHANNEL_ID
 import eu.the4thfloor.msync.R
 import eu.the4thfloor.msync.api.MeetupApi
 import eu.the4thfloor.msync.api.SecureApi
@@ -39,9 +40,9 @@ import eu.the4thfloor.msync.utils.deleteEventsNotIn
 import eu.the4thfloor.msync.utils.getAccount
 import eu.the4thfloor.msync.utils.getCalendarID
 import eu.the4thfloor.msync.utils.getRefreshToken
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.doFromSdk
 import org.jetbrains.anko.notificationManager
@@ -74,16 +75,17 @@ private fun Context.saveEvents(account: Account, calendarId: Long, events: List<
 }
 
 private fun Context.showLoginNotification() {
+    val c: Context = this
     notificationManager
         .notify(0,
-                NotificationCompat.Builder(this)
+                NotificationCompat.Builder(this, CHANNEL_ID)
                     .apply {
                         setSmallIcon(R.drawable.ic_notification)
                         setContentTitle(getString(R.string.app_name))
                         setContentText(getString(R.string.please_log_in))
-                        setContentIntent(PendingIntent.getActivity(mContext,
+                        setContentIntent(PendingIntent.getActivity(c,
                                                                    0,
-                                                                   Intent(mContext, CheckLoginStatusActivity::class.java)
+                                                                   Intent(c, CheckLoginStatusActivity::class.java)
                                                                        .apply {
                                                                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                                                                        },
@@ -94,16 +96,17 @@ private fun Context.showLoginNotification() {
 }
 
 private fun Context.showPermissionsNotification() {
+    val c: Context = this
     notificationManager
         .notify(0,
-                NotificationCompat.Builder(this)
+                NotificationCompat.Builder(this, CHANNEL_ID)
                     .apply {
                         setSmallIcon(R.drawable.ic_notification)
                         setContentTitle(getString(R.string.app_name))
                         setContentText(getString(R.string.please_approve_permissions))
-                        setContentIntent(PendingIntent.getActivity(mContext,
+                        setContentIntent(PendingIntent.getActivity(c,
                                                                    0,
-                                                                   Intent(mContext, NotificationPermissionsActivity::class.java)
+                                                                   Intent(c, NotificationPermissionsActivity::class.java)
                                                                        .apply {
                                                                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                                                                        },
@@ -123,12 +126,12 @@ fun Context.sync(secureApi: SecureApi, meetupApi: MeetupApi, finish: () -> Unit)
         return
     }
 
-    doFromSdk(Build.VERSION_CODES.M, {
+    doFromSdk(Build.VERSION_CODES.M) {
         if (checkSelfPermission(Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
             showPermissionsNotification()
             return
         }
-    })
+    }
 
     defaultSharedPreferences.apply("pref_key_last_sync" to getString(R.string.syncing_now))
 
@@ -140,9 +143,9 @@ fun Context.sync(secureApi: SecureApi, meetupApi: MeetupApi, finish: () -> Unit)
 
     loadToken(secureApi, refreshToken) { accessToken ->
         loadCalendar(meetupApi, accessToken) { events ->
-            launch(CommonPool) {
+            GlobalScope.launch(Dispatchers.Main) {
                 kotlin.run { saveEvents(account, calendarId, events) }
-                launch(UI) { done() }
+                GlobalScope.launch(Dispatchers.Main) { done() }
             }
         }
     }
@@ -150,12 +153,12 @@ fun Context.sync(secureApi: SecureApi, meetupApi: MeetupApi, finish: () -> Unit)
 
 private fun loadToken(secureApi: SecureApi, refreshToken: String, handler: (accessToken: String) -> Unit) {
     Timber.i("refreshToken: %s", refreshToken)
-    launch(CommonPool) {
+    GlobalScope.launch {
         val result = secureApi.access(mapOf("client_id" to BuildConfig.MEETUP_OAUTH_KEY,
                                             "client_secret" to BuildConfig.MEETUP_OAUTH_SECRET,
                                             "refresh_token" to refreshToken,
                                             "grant_type" to "refresh_token")).awaitResult()
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             when (result) {
                 is Result.Ok        -> handler(result.value.access_token)
                 is Result.Error     -> Timber.e(result.exception, "failed to load 'secureApi.access' - code: ${result.exception.code()}")
@@ -167,9 +170,9 @@ private fun loadToken(secureApi: SecureApi, refreshToken: String, handler: (acce
 
 private fun loadCalendar(meetupApi: MeetupApi, accessToken: String, handler: (events: List<Event>) -> Unit) {
     Timber.i("accessToken: %s", accessToken)
-    launch(CommonPool) {
+    GlobalScope.launch {
         val result = meetupApi.calendar("Bearer $accessToken", FIELDS, ONLY).awaitResult()
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             when (result) {
                 is Result.Ok        -> handler(result.value)
                 is Result.Error     -> Timber.e(result.exception, "failed to load 'meetupApi.calendar' - code: ${result.exception.code()}")
