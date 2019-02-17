@@ -18,6 +18,8 @@ package eu.the4thfloor.msync.ui
 
 import android.app.Activity
 import android.content.ComponentName
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.support.customtabs.CustomTabsCallback
@@ -55,9 +57,12 @@ class CheckLoginStatusActivity : Activity() {
             .appendQueryParameter("set_mobile", "on")
             .build()
 
-        CustomTabsClient.bindCustomTabsService(this,
-                                               "com.android.chrome",
-                                               Connection(this, uri, "com.android.chrome"))
+        val browserIntent = Intent("android.intent.action.VIEW", Uri.parse("https://"))
+        val resolveInfo = packageManager.resolveActivity(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
+        val packageName = resolveInfo.activityInfo.packageName
+
+        CustomTabsClient.bindCustomTabsService(this, packageName,
+                Connection(this, uri, packageName))
     }
 
     private class Connection(activity: CheckLoginStatusActivity,
