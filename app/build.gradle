@@ -123,16 +123,6 @@ play {
 //    userFraction = 1.0 // only necessary for 'rollout', in this case default is 0.1 (10% of the target)
 }
 
-configurations.all {
-    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-        if (details.requested.group == 'com.android.support') {
-            details.useVersion "${libs.support}"
-        } else if (details.requested.group == 'com.google.firebase') {
-            details.useVersion "${libs.firebase}"
-        }
-    }
-}
-
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
@@ -141,9 +131,7 @@ dependencies {
     implementation "androidx.browser:browser:${libs.androidx}"
 
     // firebase
-    implementation("com.firebase:firebase-jobdispatcher:${libs.firebase_jobdispatcher}") {
-        transitive = false
-    }
+    implementation "com.firebase:firebase-jobdispatcher:${libs.firebase_jobdispatcher}"
 
     // kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib:${libs.kotlin}"
