@@ -12,12 +12,6 @@ android {
     compileSdkVersion cfg.compileVersion
     buildToolsVersion cfg.buildToolsVersion
 
-    playAccountConfigs {
-        defaultAccountConfig {
-            jsonFile = file('../keystore/keys.json')
-        }
-    }
-
     defaultConfig {
 
         applicationId cfg.package
@@ -37,8 +31,6 @@ android {
         buildConfigField "String", "MEETUP_OAUTH_KEY", "\"${props.meetup_oauth_key}\""
         buildConfigField "String", "MEETUP_OAUTH_SECRET", "\"${props.meetup_oauth_secret}\""
         buildConfigField "String", "MEETUP_OAUTH_REDIRECT_URI", "\"${props.meetup_oauth_redirect_uri}\""
-
-        playAccountConfig = playAccountConfigs.defaultAccountConfig
     }
 
     if (cfg.hasKeyfile) {
@@ -126,9 +118,9 @@ android {
 }
 
 play {
+    serviceAccountCredentials = file("../keystore/keys.json")
     track = 'alpha' // 'production' or 'rollout' or 'beta' or 'alpha'
 //    userFraction = 1.0 // only necessary for 'rollout', in this case default is 0.1 (10% of the target)
-    untrackOld = true // will untrack 'alpha' while upload to 'beta'
 }
 
 configurations.all {
