@@ -193,7 +193,7 @@ private fun contentValues(calendarId: Long,
     event.venue?.let { venue ->
         values.put(Events.EVENT_LOCATION, mutableListOf<String>().apply {
             add(venue.name.trim())
-            add(venue.address_1.trim())
+            venue.address_1?.let { add(it.trim()) }
             venue.address_2?.let { add(it.trim()) }
             venue.address_3?.let { add(it.trim()) }
             add(venue.city.trim())
