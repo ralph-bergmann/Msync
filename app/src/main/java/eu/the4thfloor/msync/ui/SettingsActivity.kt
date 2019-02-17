@@ -18,6 +18,7 @@ package eu.the4thfloor.msync.ui
 
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
@@ -26,7 +27,7 @@ import android.preference.ListPreference
 import android.preference.Preference
 import android.preference.PreferenceActivity
 import android.preference.PreferenceManager
-import android.support.annotation.RequiresApi
+import androidx.annotation.RequiresApi
 import eu.the4thfloor.msync.BuildConfig.BUILD_DATE
 import eu.the4thfloor.msync.BuildConfig.GIT_SHA
 import eu.the4thfloor.msync.BuildConfig.VERSION_NAME
@@ -42,6 +43,7 @@ import org.jetbrains.anko.doFromSdk
 
 class SettingsActivity : PreferenceActivity(), SharedPreferences.OnSharedPreferenceChangeListener {
 
+    @SuppressLint("NewApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -56,7 +58,7 @@ class SettingsActivity : PreferenceActivity(), SharedPreferences.OnSharedPrefere
         findPreference("pref_key_account").summary = getAccount()?.name
         findPreference("pref_key_version").summary = "$VERSION_NAME\nBuild Date: $BUILD_DATE\nGit Commit: $GIT_SHA"
 
-        doFromSdk(Build.VERSION_CODES.M, { checkCalendarPermissions() })
+        doFromSdk(Build.VERSION_CODES.M) { checkCalendarPermissions() }
     }
 
     override fun onStart() {
@@ -127,13 +129,12 @@ class SettingsActivity : PreferenceActivity(), SharedPreferences.OnSharedPrefere
         if (preference is ListPreference) {
             // For list preferences, look up the correct display value in
             // the preference's 'entries' list.
-            val listPreference = preference
-            val index = listPreference.findIndexOfValue(stringValue)
+            val index = preference.findIndexOfValue(stringValue)
 
             // Set the summary to reflect the new value.
             preference.setSummary(
                 if (index >= 0)
-                    listPreference.entries[index]
+                    preference.entries[index]
                 else
                     null)
 

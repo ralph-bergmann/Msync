@@ -27,8 +27,8 @@ import android.provider.CalendarContract.Attendees
 import android.provider.CalendarContract.CALLER_IS_SYNCADAPTER
 import android.provider.CalendarContract.Calendars
 import android.provider.CalendarContract.Events
-import android.support.annotation.RequiresPermission
 import android.text.format.Time
+import androidx.annotation.RequiresPermission
 import eu.the4thfloor.msync.R
 import eu.the4thfloor.msync.api.models.Event
 import org.jetbrains.anko.defaultSharedPreferences
@@ -120,46 +120,46 @@ fun Context.updateCalendarColor() {
  */
 fun Context.addEvent(account: Account, calendarId: Long, event: Event): Long? {
 
-    val cursor = contentResolver.query(contentUri(Events.CONTENT_URI, account),
-                                       arrayOf(Events._ID,
-                                               Events.SELF_ATTENDEE_STATUS,
-                                               Events.SYNC_DATA1,
-                                               Events.DELETED),
-                                       "${Events.CALENDAR_ID} = ? AND ${Events._SYNC_ID} = ?",
-                                       arrayOf(calendarId.toString(), event.id),
-                                       null)
+    return contentResolver.query(contentUri(Events.CONTENT_URI, account),
+                                 arrayOf(Events._ID,
+                                         Events.SELF_ATTENDEE_STATUS,
+                                         Events.SYNC_DATA1,
+                                         Events.DELETED),
+                                 "${Events.CALENDAR_ID} = ? AND ${Events._SYNC_ID} = ?",
+                                 arrayOf(calendarId.toString(), event.id),
+                                 null)?.use { cursor ->
 
-    if (!cursor.moveToFirst()) {
+        if (!cursor.moveToFirst()) {
+            cursor.close()
+            val id = insertEvent(account, contentValues(calendarId, event, true))
+            Timber.v("event $event not found -> insert - id: $id")
+            return id
+        }
+
+        val id = cursor.getLong(cursor.getColumnIndex(Events._ID))
+        val rsvpStatus = cursor.getInt(cursor.getColumnIndex(Events.SELF_ATTENDEE_STATUS))
+        val updatedTime = cursor.getLong(cursor.getColumnIndex(Events.SYNC_DATA1))
+        val deleted = cursor.getInt(cursor.getColumnIndex(Events.DELETED))
         cursor.close()
-        val id = insertEvent(account, contentValues(calendarId, event, true))
-        Timber.v("event $event not found -> insert - id: $id")
+
+
+        if (updatedTime != event.updated || deleted == 1) {
+            Timber.v("event $event changed -> update - id: $id")
+            updateEvent(account, id, contentValues(calendarId, event))
+        }
+
+
+        event.self.rsvp?.response?.let { rsvp ->
+            if (rsvpStatus != rsvp.value) {
+                Timber.v("event $event rsvp changed -> update from $rsvpStatus to ${rsvp.value}")
+                val values = ContentValues()
+                values.put(Attendees.ATTENDEE_STATUS, rsvp.value)
+                updateSelfAttendeeStatus(account, id, values)
+            }
+        }
+
         return id
     }
-
-    val id = cursor.getLong(cursor.getColumnIndex(Events._ID))
-    val rsvpStatus = cursor.getInt(cursor.getColumnIndex(Events.SELF_ATTENDEE_STATUS))
-    val updatedTime = cursor.getLong(cursor.getColumnIndex(Events.SYNC_DATA1))
-    val deleted = cursor.getInt(cursor.getColumnIndex(Events.DELETED))
-    cursor.close()
-
-
-    if (updatedTime != event.updated || deleted == 1) {
-        Timber.v("event $event changed -> update - id: $id")
-        updateEvent(account, id, contentValues(calendarId, event))
-    }
-
-
-    event.self.rsvp?.response?.let { rsvp ->
-        if (rsvpStatus != rsvp.value) {
-            Timber.v("event $event rsvp changed -> update from $rsvpStatus to ${rsvp.value}")
-            val values = ContentValues()
-            values.put(Attendees.ATTENDEE_STATUS, rsvp.value)
-            updateSelfAttendeeStatus(account, id, values)
-        }
-    }
-
-
-    return id
 }
 
 fun Context.deleteEventsNotIn(ids: List<Long>) {
@@ -193,7 +193,7 @@ private fun contentValues(calendarId: Long,
     event.venue?.let { venue ->
         values.put(Events.EVENT_LOCATION, mutableListOf<String>().apply {
             add(venue.name.trim())
-            add(venue.address_1.trim())
+            venue.address_1?.let { add(it.trim()) }
             venue.address_2?.let { add(it.trim()) }
             venue.address_3?.let { add(it.trim()) }
             add(venue.city.trim())

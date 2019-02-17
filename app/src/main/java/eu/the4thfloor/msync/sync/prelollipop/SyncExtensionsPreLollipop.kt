@@ -34,7 +34,7 @@ fun Context.createSyncJobs(init: Boolean) {
         if (init) {
             it.createAndScheduleInitJob()
         } else {
-            val syncFrequency = defaultSharedPreferences.getString("pref_key_sync_frequency", "1440").toLong()
+            val syncFrequency = defaultSharedPreferences.getString("pref_key_sync_frequency", "1440")!!.toLong()
             it.createAndScheduleSyncJob(syncFrequency)
         }
     }

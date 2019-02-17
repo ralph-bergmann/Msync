@@ -109,7 +109,7 @@ data class Event(val id: String,
 
 data class EventVenue(val id: String,
                       val name: String,
-                      val address_1: String,
+                      val address_1: String?,
                       val address_2: String?,
                       val address_3: String?,
                       val city: String,

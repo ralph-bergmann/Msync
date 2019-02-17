@@ -64,5 +64,9 @@
     <string name="please_approve_permissions">Please approve needed calendar permissions.</string>
     <string name="logging_in">logging you in, please wait a moment</string>
 
+    <!-- notiication channel -->
+    <string name="channel_name">Msync Account Notifications</string>
+    <string name="channel_description">We use this channel to post notifications about your Meetup account.</string>
+
 
 </resources>

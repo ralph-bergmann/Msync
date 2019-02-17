@@ -22,13 +22,13 @@ import android.app.job.JobScheduler
 import android.content.ComponentName
 import android.content.Context
 import android.os.Build
-import android.support.annotation.RequiresApi
+import androidx.annotation.RequiresApi
 import org.jetbrains.anko.defaultSharedPreferences
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
-private val JOB_ID_INIT = 1
-private val JOB_ID_SYNC = 2
+private const val JOB_ID_INIT = 1
+private const val JOB_ID_SYNC = 2
 
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 fun Context.createSyncJobs(init: Boolean) {
@@ -37,7 +37,7 @@ fun Context.createSyncJobs(init: Boolean) {
             if (init) {
                 scheduler.createAndScheduleInitJob(component)
             } else {
-                val syncFrequency = defaultSharedPreferences.getString("pref_key_sync_frequency", "1440").toLong()
+                val syncFrequency = defaultSharedPreferences.getString("pref_key_sync_frequency", "1440")!!.toLong()
                 scheduler.createAndScheduleSyncJob(component, syncFrequency)
             }
         }
